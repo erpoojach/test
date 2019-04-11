@@ -1,0 +1,1297 @@
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/accordion.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/tab.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/summernote.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/custom_smart_wizard.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/autosuggest-jquery-ui.css'); ?>">
+<?php
+error_reporting(0);
+$flexiPackageList = $this->flexiPackageList;
+$flexiPackagePlaces = $this->flexiPackagePlaces;
+$arrVehicleTypeList = $this->arrVehicleTypeList;
+$PackTypeMaskArr = str_split(@$flexiPackageList['PackTypeMask']);
+$InclMaskArr = str_split(@$flexiPackageList['InclMask']);
+//$cityresarr = json_decode(@$flexiPackageList['Cities'], true);
+if (@$flexiPackageList['PackSpecType'] == '1') {
+    $flexipacres = 'Standard';
+}
+if (@$flexiPackageList['PackSpecType'] == '2') {
+    $flexipacres = 'Deluxe';
+}
+if (@$flexiPackageList['PackSpecType'] == '3') {
+    $flexipacres = 'Luxury';
+}
+
+$flexiPackageItenList = $this->flexiPackageItenList;
+$flexiPackageCityListArr  =   array();
+for ($h = 0; $h < count($flexiPackageItenList); $h++) {
+    $flexiPackageCityListArr[$flexiPackageItenList[$h]['PlaceSysId']][] = @$flexiPackageItenList[$h]['Sequence'];
+}
+
+$flexiPackageHotelList = $this->flexiPackageHotelList;
+$flexiPackageHotelListArr  =   array();
+for ($h = 0; $h < count($flexiPackageHotelList); $h++) {
+    $flexiPackageHotelListArr[@$flexiPackageHotelList[$h]['seqId']][] = @$flexiPackageHotelList[$h];
+}
+$flexiPackageTransFixed = $this->flexiPackageTransFixed;
+for ($h = 0; $h < count($flexiPackageTransFixed); $h++) {
+    $flexiPackageTransFixedArr[$flexiPackageTransFixed[$h]['TransType']][] = $flexiPackageTransFixed[$h];
+}
+$flexiPackageActivityList = $this->flexiPackageActivityList;
+for ($h = 0; $h < count($flexiPackageActivityList); $h++) {
+    $flexiPackageActivityResult[trim($flexiPackageActivityList[$h]['Type'])][] = $flexiPackageActivityList[$h];
+}
+$flexiPackageSightseenList = $this->flexiPackageSightseenList;
+for ($h = 0; $h < count(@$flexiPackageSightseenList); $h++) {
+    $flexiPackageSightseenResult[trim(@$flexiPackageSightseenList[$h]['Type'])][] = @$flexiPackageSightseenList[$h];
+}
+$flexiPackageFlight = $this->flexiPackageFlight;
+
+$flexiPackageHotelsList = $this->flexiPackageHotelsList;
+for ($h = 0; $h < count($flexiPackageHotelsList); $h++) {
+    $cityarr[]    =   $flexiPackageHotelsList[$h]['CityId'];
+    $flexiPackageHotelsListArr[$flexiPackageHotelsList[$h]['CityId']][] = $flexiPackageHotelsList[$h];
+    $NetDOccupCostArr[$flexiPackageHotelsList[$h]['CityId']]['NetDOccupCost'][] =$flexiPackageHotelsList[$h]['NetDOccupCost'];
+}
+
+$cityarr    =   array_unique($cityarr);
+//echo '<pre>';
+//print_r($flexiPackageHotelsList);
+//print_r($flexiPackageHotelsListArr);
+////echo min($NetDOccupCostArr['161']['NetDOccupCost']);
+//print_r($NetDOccupCostArr);
+//die();
+?>
+<section id="min-wrapper" class="active">
+    <div id="main-content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <!--Top header start-->
+            <h3 class="ls-top-header">Create Package</h3>
+            <!--Top header end -->
+            <!--Top breadcrumb start -->
+            <ol class="breadcrumb">
+              <li><a href="#"><i class="fa fa-home"></i></a></li>
+              <li class="active">My Inventory</li>
+              <li class="active"><a href="flexiPackageList.html">Flexi Packages</a></li>
+              <li class="active">Cost Sheet</li>
+              <div class="clear"></div>
+            </ol>
+            <!--Top breadcrumb start -->
+          </div>
+        </div>
+        <!-- Main Content Element  Start-->
+        <div class="row">
+          <div class="col-md-12">
+              <input type="hidden" accept="packageId" id="packageId" value="<?php echo @$flexiPackageList['TPSysId']?>">
+            <div class="swMain">
+              <ul class="anchor" style="margin-top:0px;">
+            <li> <a href="<?php echo $this->baseUrl('package/add-flexi-package/id/'. @$flexiPackageList['TPSysId']);?>" class="done"> <span class="stepNumber">1</span> <span class="stepDesc"> Create Package </span> </a> </li>
+            <li> <a href="<?php
+                                if (count($flexiPackageList) > 0) {
+                                    echo $this->baseUrl('package/add-flexi-package-itinerary/id/' . @$flexiPackageList['TPSysId']);
+                                } else {
+                                    echo '#';
+                                }
+                                ?>" class="done"> <span class="stepNumber">2</span> <span class="stepDesc"> Itinerary </span> </a> </li>
+            <li> <a href="<?php
+                                if (count($flexiPackageList) > 0) {
+                                    echo $this->baseUrl('package/add-flexi-package-transport/id/' . @$flexiPackageList['TPSysId']);
+                                } else {
+                                    echo '#';
+                                }
+                                ?>" class="done"> <span class="stepNumber">3</span> <span class="stepDesc"> Transport </span> </a> </li>
+            <li> <a href="<?php
+                                if (count($flexiPackageList) > 0) {
+                                    echo $this->baseUrl('package/add-flexi-package-other/id/' . @$flexiPackageList['TPSysId']);
+                                } else {
+                                    echo '#';
+                                }
+                                ?>" class="done"> <span class="stepNumber">4</span> <span class="stepDesc"> Other </span> </a> </li>
+            <li> <a href="<?php
+                                if (count($flexiPackageList) > 0) {
+                                    echo $this->baseUrl('package/add-flexi-package-tnc/id/' . @$flexiPackageList['TPSysId']);
+                                } else {
+                                    echo '#';
+                                }
+                                ?>" class="done"> <span class="stepNumber">5</span> <span class="stepDesc"> T & C </span> </a> </li>
+            <li> <a href="<?php
+                                if (count($flexiPackageList) > 0) {
+                                    echo $this->baseUrl('package/add-flexi-package-costsheet/id/' . @$flexiPackageList['TPSysId']);
+                                } else {
+                                    echo '#';
+                                }
+                                ?>" class="selected"> <span class="stepNumber">6</span> <span class="stepDesc"> Cost Sheet </span> </a> </li>
+          </ul>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="alert alert-info">
+              <div class="col-md-8  no-margin no-padding">
+                <h4 class="no-margin"><?php echo strtoupper(@$flexiPackageList['Title']) ?> (<?php echo @$flexipacres ?>)</h4>
+<!--            <h5 style="margin-bottom:0px;"><?php echo @$totalnight ?> Nights <?php echo @$totalnight + 1 ?> Days</h5>-->
+              </div>
+              <div class="clear"></div>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="panel panel-dark">
+              <div class="panel-heading">
+                <h3 class="panel-title">Cost Sheet</h3>
+              </div>
+              <div class="panel-body whbg">
+                <div class="panel-body table-responsive no-padding">
+                  <table class="table table-bordered no-margin">
+                    <tbody>
+                      <tr class="alert alert-success">
+                        <th width="150">Particulars</th>
+                        <th width="150">Name</th>
+                        <th>Duration</th>
+                        <th>Source</th>
+                        <th>Supplier</th>
+                        <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Double Occupancy</span></th>
+                        <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Single Occupancy</span></th>
+                        <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Extra Bed </span></th>
+                        <th class="text-center" nowrap width="130">Cost-Per Child <span class="small center-block">Without Bed</span></th>
+                        <th>Booking Type</th>
+                      </tr>
+                      <?php                           
+                          for($pa=0;$pa<count($flexiPackageFlight);$pa++) { 
+                             $decodearr = json_decode(base64_decode($flexiPackageFlight[$pa]['encodedata']),true); 
+//                             echo '<pre>';
+//                             print_r($decodearr);
+                     ?>                      
+                      <tr>
+                        <td>Flight</td>
+                        <td><?php echo $decodearr['airline']?><br><?php echo $flexiPackageFlight[$pa]['FlightNumber']?></td>
+                        <td><?php echo $flexiPackageFlight[$pa]['FlyingMinutes']?> minutes</td>
+                        <td>Internal</td>
+                        <td>-</td>
+                        <td><input type="email" class="form-control whbg calccost" value="<?php echo $flexiPackageFlight[$pa]['Cost']*2?>"></td>
+                        <td><?php echo $flexiPackageFlight[$pa]['Cost']?></td>
+                        <td>NA</td>
+                        <td>NA</td>
+                        <td>On request</td>
+                      </tr>
+                          <?php } ?>
+                      <?php 
+                      foreach ($cityarr as $cityId) {
+                          $daycountres = count($flexiPackageCityListArr[$cityId])-1;
+                          $minrate =    min($NetDOccupCostArr[$cityId]['NetDOccupCost']);
+                          for($fh=0;$fh<count($flexiPackageHotelsListArr[$cityId]);$fh++) {
+                              $mnrate =  '1';
+                              if(($flexiPackageHotelsListArr[$cityId][$fh]['NetDOccupCost']==$minrate)&&($mnrate=='1')) {   
+                                 $netdoccupycostres =@$flexiPackageHotelsListArr[$cityId][$fh]['NetDOccupCost']/2; 
+                      ?>
+                      <tr>
+                        <td>Hotel</td>
+                        <td><?php echo @$flexiPackageHotelsListArr[$cityId][$fh]['Title'];?></td>
+                        <td><?php echo $daycountres?> Nights</td>
+                        <td>Internal</td>
+                        <td><?php echo @$flexiPackageHotelsListArr[$cityId][$fh]['SupplierName'];?></td>
+                        <td><input type="email" value="<?php echo round($netdoccupycostres*$daycountres);?>" class="form-control whbg calccost"></td>
+                        <td><input type="email" value="<?php echo round(@$flexiPackageHotelsListArr[$cityId][$fh]['NetSOccupCost']*$daycountres);?>" class="form-control whbg"></td>
+                        <td><input type="email" value="<?php echo round(@$flexiPackageHotelsListArr[$cityId][$fh]['NetExtraBedCost']*$daycountres);?>" class="form-control whbg"></td>
+                        <td><input type="email" value="<?php echo round(@$flexiPackageHotelsListArr[$cityId][$fh]['NetExtraWOBedCost']*$daycountres);?>" class="form-control whbg"></td>
+                        <td>On request</td>
+                      </tr>
+                              <?php     $mnrate++;                              
+                              } }   }   ?>                   
+                      
+                          <?php 
+                          $flexiPackageActivityList = @$flexiPackageActivityResult['Included'];
+                          for($pa=0;$pa<count($flexiPackageActivityList);$pa++) { ?>                      
+                      <tr>
+                        <td>Activity day <?php echo $flexiPackageActivityList[$pa]['Sequence']?></td>
+                        <td><?php echo $flexiPackageActivityList[$pa]['Title']?></td>
+                        <td>40 minutes</td>
+                        <td>Internal</td>
+                        <td>ABC supplier</td>
+                        <td><input type="email" class="form-control whbg calccost" value="<?php echo $flexiPackageActivityList[$pa]['Cost']?>"></td>
+                        <td>NA</td>
+                        <td>NA</td>
+                        <td>NA</td>
+                        <td><?php echo $flexiPackageActivityList[$pa]['Type']?></td>
+                      </tr>
+                          <?php } ?>
+                      <?php 
+                          $flexiPackageSightseenList = @$flexiPackageSightseenResult['Included'];
+                          for($pa=0;$pa<count(@$flexiPackageSightseenList);$pa++) { ?>                      
+                      <tr>
+                        <td>Sightseen <?php echo @$flexiPackageSightseenList[$pa]['Sequence']?></td>
+                        <td><?php echo @$flexiPackageSightseenList[$pa]['Title']?></td>
+                        <td>30 minutes</td>
+                        <td>Internal</td>
+                        <td>ABC supplier</td>
+                        <td><input type="email" class="form-control whbg calccost" value="<?php echo @$flexiPackageSightseenList[$pa]['Cost']?>"></td>
+                        <td>NA</td>
+                        <td>NA</td>
+                        <td>NA</td>
+                        <td><?php echo @$flexiPackageSightseenList[$pa]['Type']?></td>
+                      </tr>
+                          <?php } ?>
+                      <tr class="alert-info">
+                        <td><strong>Total</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="costresult">50,000</td>
+                        <td>NA</td>
+                        <td>NA</td>
+                        <td>NA</td>
+                        <td></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+                <!--Table Wrapper Finish-->
+              </div>
+              <div class="panel-body  whbg">
+                <div class="panel panel-primary">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Optional Inclusions</h3>
+                  </div>
+                  <div class="panel-body whbg no-padding">
+                    <div class=" table-responsive " style="padding-top:15px;">
+                      <table class="table table-bordered  no-margin">
+                        <tr class="alert alert-info">
+                            <th>Type</th>
+                          <th>Particulars</th>
+                          <th>Title</th>
+                          <th>Cost/Person</th>
+                          <th>Mark-up (%)</th>
+                          <th>Total Cost</th>
+                        </tr>
+                        <?php 
+                          $flexiPackageActivityList = @$flexiPackageActivityResult['Optional'];
+                          for($pa=0;$pa<count($flexiPackageActivityList);$pa++) { 
+                              if($flexiPackageActivityList[$pa]['Markup']>0){
+                              $markuprate = ($flexiPackageActivityList[$pa]['Cost']*$flexiPackageActivityList[$pa]['Markup'])/100;
+                              }
+                        ?>                      
+                      <tr>
+                        <td><?php echo $flexiPackageActivityList[$pa]['Type']?></td>
+                        <td>Activity day <?php echo $flexiPackageActivityList[$pa]['Sequence']?></td>
+                        <td><?php echo $flexiPackageActivityList[$pa]['Title']?></td>                        
+                        <td><?php echo $flexiPackageActivityList[$pa]['Cost']?></td>
+                        <td><input class="form-control whbg" onchange="return updateopinclmarkup('<?php echo $flexiPackageActivityList[$pa]['TPIntSysId']?>','<?php echo $flexiPackageActivityList[$pa]['TPActivitySysId']?>','<?php echo $flexiPackageActivityList[$pa]['Sequence']?>','<?php echo $flexiPackageActivityList[$pa]['Cost']?>')" type="text" name="markup_<?php echo $flexiPackageActivityList[$pa]['TPIntSysId']?>_<?php echo $flexiPackageActivityList[$pa]['TPActivitySysId']?>_<?php echo $flexiPackageActivityList[$pa]['Sequence']?>" id="markup_<?php echo $flexiPackageActivityList[$pa]['TPIntSysId']?>_<?php echo $flexiPackageActivityList[$pa]['TPActivitySysId']?>_<?php echo $flexiPackageActivityList[$pa]['Sequence']?>" value="<?php echo $flexiPackageActivityList[$pa]['Markup']?>"></td>                   
+                        <td id="markres_<?php echo $flexiPackageActivityList[$pa]['TPIntSysId']?>_<?php echo $flexiPackageActivityList[$pa]['TPActivitySysId']?>_<?php echo $flexiPackageActivityList[$pa]['Sequence']?>"><?php echo $flexiPackageActivityList[$pa]['Cost']+@$markuprate?></td>                       
+                      </tr>
+                          <?php } ?>
+                      <?php 
+                          $flexiPackageSightseenList = @$flexiPackageSightseenResult['Optional'];
+                          for($pa=0;$pa<count(@$flexiPackageSightseenList);$pa++) { 
+                              if(@$flexiPackageSightseenList[$pa]['Markup']>0){
+                              $markuprate = (@$flexiPackageSightseenList[$pa]['Cost']*@$flexiPackageSightseenList[$pa]['Markup'])/100;
+                              }
+                        ?>                      
+                      <tr>
+                        <td><?php echo @$flexiPackageSightseenList[$pa]['Type']?></td>
+                        <td>Sightseen <?php echo @$flexiPackageSightseenList[$pa]['Sequence']?></td>
+                        <td><?php echo @$flexiPackageSightseenList[$pa]['Title']?></td>                        
+                        <td><?php echo @$flexiPackageSightseenList[$pa]['Cost']?></td>
+                        <td><input class="form-control whbg" onchange="return updateopinclmarkup('<?php echo @$flexiPackageSightseenList[$pa]['TPSysId']?>','<?php echo @$flexiPackageSightseenList[$pa]['SSSysId']?>','<?php echo @$flexiPackageSightseenList[$pa]['Sequence']?>','<?php echo @$flexiPackageSightseenList[$pa]['Cost']?>')" type="text" name="markup_<?php echo @$flexiPackageSightseenList[$pa]['TPSysId']?>_<?php echo $flexiPackageSightseenList[$pa]['SSSysId']?>_<?php echo @$flexiPackageSightseenList[$pa]['Sequence']?>" id="markup_<?php echo @$flexiPackageSightseenList[$pa]['TPSysId']?>_<?php echo $flexiPackageSightseenList[$pa]['SSSysId']?>_<?php echo @$flexiPackageSightseenList[$pa]['Sequence']?>" value="<?php echo @$flexiPackageSightseenList[$pa]['Markup']?>"></td>                   
+                        <td id="markres_<?php echo @$flexiPackageSightseenList[$pa]['TPSysId']?>_<?php echo @$flexiPackageSightseenList[$pa]['SSSysId']?>_<?php echo @$flexiPackageSightseenList[$pa]['Sequence']?>"><?php echo @$flexiPackageSightseenList[$pa]['Cost']+@$markuprate?></td>                       
+                      </tr>
+                          <?php } ?>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <div class="panel-body  whbg">
+                <div class="panel panel-primary">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Fixed Transport</h3>
+                  </div>
+                  <div class="panel-body whbg no-padding">
+                    <div class=" table-responsive " style="padding-top:15px;">
+                      <table class="table table-bordered  no-margin">
+                        <tr class="alert alert-info">
+                          <th>Type</th>
+                          <th>Particulars</th>                          
+                          <th>Cost/Person</th>                          
+                        </tr>
+                        <?php 
+                          for ($h = 0; $h<count($flexiPackageTransFixed); $h++) {
+                              if($flexiPackageTransFixed[$h]['TransType']=='car') {
+                                  $frmval = 'Type : '.ucfirst($flexiPackageTransFixed[$h]['TransTypeCat']);
+                                  $toval  = 'Capacity : '.$flexiPackageTransFixed[$h]['Capacity'];
+                                  $cost   = $flexiPackageTransFixed[$h]['CostPerson']/2;
+                              } else {
+                                  $frmval = 'From : '.ucfirst($flexiPackageTransFixed[$h]['FromPlace']);
+                                  $toval  = 'To : '.ucfirst($flexiPackageTransFixed[$h]['ToPlace']);
+                                  $cost   = $flexiPackageTransFixed[$h]['CostPerson'];
+                              }
+                        ?>                      
+                        <tr>
+                        <td><?php echo ucfirst($flexiPackageTransFixed[$h]['TransType'])?></td>
+                        <td><?php echo @$frmval?><br><?php echo @$toval?></td>                         
+                        <td><?php echo @$cost?></td>
+                        </tr>
+                          <?php } ?>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="panel-body whbg">
+                <div class=" panel  panel-info   whbg">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Market Wise Rate Sheet</h3>
+                  </div>
+                  <div class="col-md-4  panel-body  whbg" id="marktype">
+                    <div class="form-group no-margin">
+                      <label>Mark up / Commission Type</label>
+                      <select id="MarkType" accesskey="MarkType" class="demo-default select-country" placeholder="Select">
+                        <option value="">Select</option>
+                        <option value="Amount">Fixed Amount</option>
+                        <option value="Percent">Fixed %</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div class="col-md-12 no-padding costomizetab">
+                    <div class="panel-body table-responsive no-padding no-border">
+                      <table class="table table-bordered no-margin" id="costmarkupres">
+                        <tr class="alert alert-success">
+                          <th><strong>Market Place</strong></th>
+                          <th><strong>Permission</strong></th>
+                          <th><strong>Mark up (%)</strong></th>
+                          <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Double Occupancy</span></th>
+                          <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Single Occupancy</span></th>
+                          <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Extra Bed </span></th>
+                          <th class="text-center" nowrap width="130">Cost-Per Child <span class="small center-block">Without Bed</span></th>
+                          <td class="text-center small"><strong>Tax (%)</strong></td>
+                          <th><strong>Action</strong></th>
+                        </tr>
+                        </tr>
+                        
+                        <tr class="alert alert-warning">
+                          <td colspan="3" class="text-center"><strong>Published Fare <i class="fa fa-long-arrow-right"></i></strong></td>
+                          <td class="text-center small"><strong><span class="costresult"></span></strong></td>
+                          <td class="text-center small"><strong>NA</strong></td>
+                          <td class="text-center small"><strong>NA</strong></td>
+                          <td class="text-center small"><strong>NA</strong></td>
+                          <td class="text-center small"></td>
+                          <td>&nbsp;</td>
+                        </tr>
+                        <tr>
+                            <td><select id="marketPlace" name="marketPlace" class="demo-default select-country" placeholder="Select" style="width:150px; white-space:nowrap;">
+                              <option value="0">Select</option>
+                              <option value="1_B2C&nbsp;(Tripsbank)">B2C&nbsp;(Tripsbank)</option>
+                              <option value="2_B2B&nbsp;(Tripsbank)">B2B&nbsp;(Tripsbank)</option>
+                              <option value="3_Staff">Staff</option>
+                              <option value="4_My&nbsp;Website&nbsp;(B2C)">My&nbsp;Website&nbsp;(B2C)</option>
+                              <option value="5_My&nbsp;B2B">My&nbsp;B2B</option>
+                            </select>
+                          </td>
+                          <td><select id="permission" name="permission" class="demo-default select-country" placeholder="Select" style="width:110px;">
+                              <option value="">Select</option>
+                              <option value="1">Allow</option>
+                              <option value="0">Not Allowed</option>
+                            </select>
+                          </td>
+                          <td><input type="text" class="form-control whbg " id="markup" name="markup"></td>
+                          <td><input type="text" class="form-control whbg " id="singleoccupancy" name="singleoccupancy"></td>
+                          <td><input type="text" class="form-control whbg " id="doubleoccupancy" name="doubleoccupancy"></td>
+                          <td><input type="text" class="form-control whbg " id="extrabed" name="extrabed"></td>
+                          <td><input type="text" class="form-control whbg " id="withoutbed" name="withoutbed"></td>
+                          <td>
+                              <select id="tax" name="tax" class="demo-default select-country" placeholder="Select">
+                              <option value="Included">Included</option>
+                              <option value="Excluded" selected>Excluded</option>
+                            </select>
+                            <input type="text" class="form-control whbg" id="taxres" name="taxres">
+                          </td>
+                          <td><a class="btn btn-success btn-sm tooltipLink"  data-placement="top" data-toggle="tooltip" data-original-title="Add" href="javascript:void(0);" onclick="marketplacerate()"><i class="fa fa-fw fa-arrows"></i></a> </td>
+                        </tr> 
+                       
+                      </table>
+                    </div>
+                  </div>
+                  <div class="clear"></div>
+                </div>
+              </div>
+              <div class="panel-body whbg no-padding">
+                <div class="col-md-6">
+                  <div class="panel panel-primary">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Pax limitation</h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                      <table class="table table-bordered no-margin">
+                        <tbody>
+                          <tr class="alert alert-info">
+                            <th></th>
+                            <th>Adult</th>
+                            <th>Kids</th>
+                          </tr>
+                          <tr>
+                            <td>Minimum Pax Allowed</td>
+                            <td><select id="select-country" class="demo-default select-country" placeholder="Select">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                              </select>
+                            </td>
+                            <td><select id="select-country" class="demo-default select-country" placeholder="Select">
+                                <option value="1">1</option>
+                                <option value="2">2</option>
+                                <option value="3">3</option>
+                                <option value="4">4</option>
+                              </select></td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="panel panel-primary">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Booking Rules</h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                      <table class="table table-bordered no-margin">
+                        <tbody>
+                          <tr>
+                            <td>Advance</td>
+                            <td><input type="email" class="form-control whbg pull-left" style="width:85%;">
+                              &nbsp;&nbsp;%</td>
+                            <td>at the time of confirmation</td>
+                          </tr>
+                          <tr>
+                            <td>Balance before</td>
+                            <td><input type="email" class="form-control whbg pull-left" style="width:85%;">
+                              &nbsp;&nbsp;days</td>
+                            <td>before the departure date</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="panel-body whbg">
+                <div class="col-md-12 no-padding">
+                  <div class="panel panel-danger">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Cancellation</h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                        <table class="table table-bordered no-margin" name="cancellationres" id="cancellationres">
+                        <tbody>
+                          <tr>
+                            <td>Before
+                                <select class="demo-default" placeholder="Select" name="cancel" id="cancel">
+                                    <option value="90">90</option>
+                                    <option value="60">60</option>
+                                    <option value="30">30</option>
+                                    <option value="15">15</option>
+                                    <option value="7">7</option>
+                                    <option value="3">3</option>
+                              </select>
+                              Days</td>
+                            <td><input type="email" class="form-control whbg pull-left" style="width:50px;" name="cancelpercnt" id="cancelpercnt">
+                              <span class="pull-left">&nbsp;%&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                              <input class="form-control whbg pull-left" style="width:70px;" type="email" name="cancelres" id="cancelres">
+                              &nbsp;<span class="fa fa-inr"></span></td>
+                            <td><a href="#" class="btn btn-success btn-sm tooltipLink"  data-placement="top" data-toggle="tooltip" data-original-title="Add" onclick="cancelpolicy()"><i class="fa fa-fw fa-arrows"></i></a></td>
+                          </tr>
+                          
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div class="col-md-12 no-padding no-margin">
+            <div class="panel-footer text-right"><a href="<?php echo $this->baseUrl('package/view-flexi-final-package/id/'.@$flexiPackageList['TPSysId']);?>" class="btn btn-primary pull-left"><i class="fa fa-image"></i> View Package</a> <a href="javavoid(0)" class="btn btn-success" data-target="#myModa1Modify" data-toggle="modal">Finish</a>&nbsp;&nbsp;
+              <button class="btn btn-default" type="cancel">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <!-- Main Content Element  End-->
+      </div>
+    </div>
+    <?php echo $this->render('copyrightfooter.phtml'); ?>
+  </section>
+<!--Page main section end -->
+<!--Right hidden  section start-->
+<?php echo $this->render('newfooter.phtml'); ?>
+<div class="modal fade" id="myModa1activities" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">View Activities</h4>
+      </div>
+      <div class="modal-body">
+        <div class="panel-body table-responsive no-padding">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Activities Name</th>
+                <th>Price</th>
+                <th>Type</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning btn-round" data-dismiss="modal">Submit</button>
+        <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="myModa1transport" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">View Activities</h4>
+      </div>
+      <div class="modal-body">
+        <div class="panel-body table-responsive no-padding">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Vehicle Name</th>
+                <th>Price</th>
+                <th>Type</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Indiac car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>SIC</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Innova Car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Pvt</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Indiac car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>SIC</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Innova Car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Pvt</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Indiac car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>SIC</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Innova Car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Pvt</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Indiac car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>SIC</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Innova Car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Pvt</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Indiac car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>SIC</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Innova Car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Pvt</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning btn-round" data-dismiss="modal">Submit</button>
+        <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="myModa1changeflight" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header no-border-btm" style="position:relative;">
+        <ul class="nav nav-tabs icon-tab">
+          <li class="active"><a data-toggle="tab" href="#home">TripsBank Results</a></li>
+          <li><a data-toggle="tab" href="#profile">Internal Results</a></li>
+          <li><a data-toggle="tab" href="#messages">API Results</a></li>
+        </ul>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="position:absolute; right:20px; top:15px;">&times;</button>
+        <div class="clear"></div>
+      </div>
+      <div class="col-md-12 no-border-bottom">
+        <div class="col-md-8" style="padding-left:0px;">
+          <div class="col-md-12 panel panel-default no-margin no-padding">
+            <div class="panel-heading">
+              <h6 class="no-margin"><i class="fa fa-filter"></i> Filter By</h6>
+            </div>
+            <div class="col-md-6" style="margin:2px 0px;">
+              <div class="form-group form-group1 no-margin">
+                <label>Airlines</label>
+                <select id="select-state1" name="state[]" multiple class="demo-default select-state">
+                  <option value="">Any</option>
+                  <option value="AL">Spice Jet</option>
+                  <option value="AK">Indigo</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6" style="margin:2px 0px;">
+              <div class="form-group form-group1 no-margin">
+                <label>Stops</label>
+                <select id="select-state1" name="state[]" multiple class="demo-default select-state">
+                  <option value="">Any</option>
+                  <option value="AL">Nonstop</option>
+                  <option value="AK">1 Stop</option>
+                </select>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+        </div>
+        <div class="col-md-4 panel panel-default no-padding no-margin">
+          <div class="panel-heading">
+            <h6 class="no-margin">Sort By</h6>
+          </div>
+          <div class="panel-body">
+            <select id="select-country" class="demo-default select-country no-padding no-margin" placeholder="Select" style="font-size:10px;">
+              <option value="1">Price (Low To High)</option>
+              <option value="2">Price (High To Low)</option>
+              <option value="3">Time (Low To High)</option>
+              <option value="4">Time (High To Low)</option>
+            </select>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div class="col-md-12 no-border-bottom">
+        <div class="panel-body table-responsive no-padding overflowflight">
+          <table class="table table-bordered">
+            <tr>
+              <td class="alert alert-black text-center" colspan="3"><strong><i class="fa fa-long-arrow-left"></i> Onward <i class="fa fa-long-arrow-right"></i></strong></td>
+              <td class="alert alert-black text-center" colspan="3"><strong><i class="fa fa-long-arrow-right"></i> Inward <i class="fa fa-long-arrow-left"></i></strong></td>
+              <td colspan="3" class="alert alert-lightblack text-center"></td>
+            </tr>
+            <tr>
+              <th class="alert alert-success">Flight</th>
+              <th class="alert alert-success">Departure</th>
+              <th class="alert alert-success">Arrival</th>
+              <th class="alert alert-info">Flight</th>
+              <th class="alert alert-info">Departure</th>
+              <th class="alert alert-info">Arrival</th>
+              <th class="alert alert-danger">Supplier</th>
+              <th class="alert alert-danger text-right">Cost</th>
+              <th class="alert alert-danger">&nbsp;</th>
+            </tr>
+            <tr>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="alert alert-warning">New Delhi<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="alert alert-warning">Mumbai<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="whbg"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="whbg">Mumbai<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="whbg">New Delhi<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="alert alert-warning">New Delhi<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="alert alert-warning">Mumbai<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="whbg"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="whbg">Mumbai<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="whbg">New Delhi<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="alert alert-warning">New Delhi<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="alert alert-warning">Mumbai<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="whbg"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="whbg">Mumbai<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="whbg">New Delhi<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="alert alert-warning">New Delhi<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="alert alert-warning">Mumbai<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="whbg"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="whbg">Mumbai<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="whbg">New Delhi<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="alert alert-warning">New Delhi<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="alert alert-warning">Mumbai<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="whbg"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="whbg">Mumbai<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="whbg">New Delhi<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="clear"></div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="myModa1changehotels" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header no-border-btm" style="position:relative;">
+        <ul class="nav nav-tabs icon-tab">
+          <li class="active"><a data-toggle="tab" href="#home">TripsBank Results</a></li>
+          <li><a data-toggle="tab" href="#profile">Internal Results</a></li>
+          <li><a data-toggle="tab" href="#messages">API Results</a></li>
+        </ul>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="position:absolute; right:20px; top:15px;">&times;</button>
+        <div class="clear"></div>
+      </div>
+      <div class="col-md-12 no-border-bottom">
+        <div class="col-md-8" style="padding-left:0px;">
+          <div class="col-md-12 panel panel-default no-margin no-padding">
+            <div class="panel-heading">
+              <h6 class="no-margin"><i class="fa fa-filter"></i> Filter By</h6>
+            </div>
+            <div class="col-md-6" style="margin:2px 0px;">
+              <div class="form-group form-group1 no-margin">
+                <label>Star Rating</label>
+                <select id="select-state1" name="state[]" multiple class="demo-default select-state">
+                  <option value="">Any</option>
+                  <option value="1">5 Star</option>
+                  <option value="2">4 Star</option>
+                  <option value="3">3 Star</option>
+                  <option value="4">2 Star</option>
+                  <option value="5">1 Star</option>
+                  <option value="6">No Star</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6" style="margin:2px 0px;">
+              <div class="form-group form-group1 no-margin">
+                <label>User Rating</label>
+                <select id="select-state1" name="state[]" multiple class="demo-default select-state">
+                  <option value="">Any</option>
+                  <option value="1">Excellent</option>
+                  <option value="2">Good</option>
+                  <option value="3">Average</option>
+                  <option value="4">Poor</option>
+                </select>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+        </div>
+        <div class="col-md-4 panel panel-default no-padding no-margin">
+          <div class="panel-heading">
+            <h6 class="no-margin">Sort By</h6>
+          </div>
+          <div class="panel-body">
+            <select id="select-country" class="demo-default select-country no-padding no-margin" placeholder="Select" style="font-size:10px;">
+              <option value="1">Price (Low To High)</option>
+              <option value="2">Price (High To Low)</option>
+              <option value="3">Rating (Low To High)</option>
+              <option value="4">Rating (High To Low)</option>
+            </select>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div class="col-md-12 no-border-bottom">
+        <div class="panel-body table-responsive no-padding overflowflight">
+          <table class="table table-bordered">
+            <tr>
+              <th class="alert alert-success">Hotel Name</th>
+              <th class="alert alert-success">Room Type</th>
+              <th class="alert alert-success">Star Rating</th>
+              <th class="alert alert-success">Supplier</th>
+              <th class="alert alert-danger text-right">Cost</th>
+              <th class="alert alert-danger">&nbsp;</th>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">Treebo Cartier</td>
+              <td class="alert alert-warning">Standard</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">The Elanza Hotel</td>
+              <td class="alert alert-warning">Deluxe</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">TB</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">juSTa Indiranagar</td>
+              <td class="alert alert-warning">Luxury</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">juSTa MG Road</td>
+              <td class="alert alert-warning">Standard</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">TB</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">Treebo Cartier</td>
+              <td class="alert alert-warning">Luxury</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">juSTa MG Road</td>
+              <td class="alert alert-warning">Deluxe</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">TB</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">Ramada Encore</td>
+              <td class="alert alert-warning">Standard</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">Shreyas Yoga Retreats</td>
+              <td class="alert alert-warning">Deluxe</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">TB</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="clear"></div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="myModa1Modify" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel"> Thank your</h4>
+      </div>
+      <div class="modal-body"> Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+        Lorem Ipsum has been the industry's standard dummy text ever since
+        <div class="clear"></div>
+      </div>
+      <div class="modal-footer"> <a href="createItineraryFlexi.html" type="button" class="btn btn-info btn-round" >Finish</a> </div>
+    </div>
+  </div>
+</div>
+<script src="<?php echo $this->baseUrl('public/assets/js/tabulous.js'); ?>"></script>
+<!-- MiniColors Library Script Start -->
+<script src="<?php echo $this->baseUrl('public/assets/js/jquery.minicolors.min.js'); ?>"></script>
+<!-- MiniColors Library Script Start -->
+<!-- Date & Time Picker Library Script Start -->
+<script src="<?php echo $this->baseUrl('public/assets/js/jquery.datetimepicker.js'); ?>"></script>
+<!-- Date & Time Picker Library Script End -->
+<!--Demo for Date, Time Color Picker Script Start -->
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/pickerTool.js'); ?>"></script>
+<!--Demo for Date, Time Color Picker Script End -->
+<script src="<?php echo $this->baseUrl('public/assets/js/summernote.min.js'); ?>"></script>
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/editor.js'); ?>"></script>
+<!-- Script For Icheck -->
+<script src="<?php echo $this->baseUrl('public/assets/js/icheck.min.js'); ?>"></script>
+<!-- Script For Icheck -->
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/checkboxRadio.js'); ?>"></script>
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/uiElements.js'); ?>"></script>
+<!--Demo ui element Script End -->
+<script type="application/x-javascript">
+	$(".flightInfo") .hover(function(){
+		$(this).parent().children(".tooltipflight") .show();
+	});
+		
+	$(".flightInfo").mouseleave(function(){
+		$(".tooltipflight") .hide();
+	});	
+	
+	$(".btwob").click(function(){
+		$("#b2br").show();
+	});
+	
+	$(".tacid").click(function(){
+		$("#b2br1").show();
+		$("#b2br2").show();
+	});
+        function marketplacerate(){
+            var MarkType            =   $("#MarkType").val();
+            var marketPlace         =   $("#marketPlace").val(); 
+            var permission          =   $("#permission").val(); 
+            var markup              =   $("#markup").val(); 
+            var singleoccupancy     =   $("#singleoccupancy").val(); 
+            var doubleoccupancy     =   $("#doubleoccupancy").val();
+            var extrabed            =   $("#extrabed").val(); 
+            var withoutbed          =   $("#withoutbed").val();
+            var tax                 =   $("#tax").val();
+            var taxres              =   $("#taxres").val();
+            var packageId           =   $("#packageId").val();
+            var htmlres             =   '<tr><td>'+marketPlace+'</td><td>'+permission+'</td><td>'+markup+'</td><td class="text-center">'+singleoccupancy+'</td><td class="text-center">'+doubleoccupancy+'</td><td class="text-center">'+extrabed+'</td>  <td class="text-center">'+withoutbed+'</td><td class="text-center">'+tax+' '+taxres+'</td><td><a href="javascript:void(0);" class="btn ls-red-btn btn-sm tooltipLink"  data-placement="top" data-toggle="tooltip" data-original-title="Delete"><i class="fa fa-trash-o"></i></a></td></tr>';
+            $("#costmarkupres").append(htmlres);
+            $.ajax({
+             url  : '/package/package-marketwise-rate',
+             data : { packageId : packageId, MarkType : MarkType, marketPlace : marketPlace, permission : permission,markup : markup, singleoccupancy : singleoccupancy, doubleoccupancy : doubleoccupancy, extrabed : extrabed,withoutbed : withoutbed, tax : tax, taxres : taxres },
+             dataType : 'html',
+             type : 'POST',
+             error : function() {
+
+             },
+             beforeSend : function() {
+             // $("#markup-table-loader").css("display","inline-block");
+             // $("#markup-settings-grid-content").html('');
+             },
+             success : function(response) { 
+                // alert('Updated successfully');
+                 //$("#resultdayiten").append(response);
+                 //$("#markup-settings-grid-content").html(response);
+                 //$("#markup-table-loader").css("display","none");
+                 }
+             });
+    
+        }
+        function updateopinclmarkup(packageId,actId,day,cost){
+    
+            var markup     =	$("#markup_"+packageId+"_"+actId+"_"+day).val();            
+            // alert(markup);
+             // alert(cost);
+            var inccost = (cost*markup)/100;
+            var newcost = parseFloat(inccost)+parseFloat(cost);
+            $("#markres_"+packageId+"_"+actId+"_"+day).html(newcost); 
+             //alert(detail);markres_
+             $.ajax({
+             url  : '/package/update-optional-incl-markup',
+             data : { packageId : packageId, actId : actId, day : day, markup : markup },
+             dataType : 'html',
+             type : 'POST',
+             error : function() {
+
+             },
+             beforeSend : function() {
+             // $("#markup-table-loader").css("display","inline-block");
+             // $("#markup-settings-grid-content").html('');
+             },
+             success : function(response) { 
+                // alert('Updated successfully');
+                 //$("#resultdayiten").append(response);
+                 //$("#markup-settings-grid-content").html(response);
+                 //$("#markup-table-loader").css("display","none");
+                 }
+             });
+         }
+        function cancelpolicy(){
+            var cancel              =   $("#cancel").val(); 
+            var cancelpercnt        =   $("#cancelpercnt").val(); 
+            var cancelres           =   $("#cancelres").val();            
+            var packageId           =   $("#packageId").val();
+        var htmlres  = '<tr><td>Before '+cancel+' Days</td><td>'+cancelpercnt+'%</td><td><a href="#" class="btn ls-red-btn btn-sm tooltipLink"  data-placement="top" data-toggle="tooltip" data-original-title="Delete"><i class="fa fa-trash-o"></i></a></td></tr>';    
+        $("#cancellationres").append(htmlres);
+        $.ajax({
+             url  : '/package/package-cancel-policy',
+             data : { packageId : packageId, cancel : cancel, cancelpercnt : cancelpercnt, cancelres : cancelres },
+             dataType : 'html',
+             type : 'POST',
+             error : function() {
+
+             },
+             beforeSend : function() {
+             // $("#markup-table-loader").css("display","inline-block");
+             // $("#markup-settings-grid-content").html('');
+             },
+             success : function(response) { 
+                // alert('Updated successfully');
+                 //$("#resultdayiten").append(response);
+                 //$("#markup-settings-grid-content").html(response);
+                 //$("#markup-table-loader").css("display","none");
+                 }
+             });
+    
+        }
+        var totcost = '0';
+        $(".calccost").each(function() {
+        totcost = parseFloat(totcost)+parseFloat($(this).val());
+        });
+        //alert(totcost);
+        $(".costresult").html(totcost);
+        function updatepackagecost(){
+         var cost = $(".costresult").html(); 
+         var packageId           =   $("#packageId").val();
+         //alert(cost);
+         $.ajax({
+             url  : '/package/update-package-cost',
+             data : { packageId : packageId, cost : cost },
+             dataType : 'html',
+             type : 'POST',
+             error : function() {
+
+             },
+             beforeSend : function() {
+             // $("#markup-table-loader").css("display","inline-block");
+             // $("#markup-settings-grid-content").html('');
+             },
+             success : function(response) { 
+                // alert('Updated successfully');
+                 //$("#resultdayiten").append(response);
+                 //$("#markup-settings-grid-content").html(response);
+                 //$("#markup-table-loader").css("display","none");
+                 }
+             });
+        }
+        updatepackagecost();
+	</script>
+</body>
+</html>

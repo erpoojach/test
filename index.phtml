@@ -1,0 +1,176 @@
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/countrycode/style.css'); ?>" >
+<div class="col-md-4 login_gt_right" style="background:#f3f3f3; box-shadow:0px 3px 10px #333333; display:flex;">
+
+    <div style="margin:auto; width:100%;">
+        <div class="col-md-12 ">
+            <div class="form-group form-group registerform">
+                <h1> <span><i class="fa fa-unlock"></i></span> Register Now</h1>
+                <div class="col-md-12" id="dispMessage"></div>
+                <form id="AgencyRegisterForm" action="#" method="POST" autocomplete="off">
+                    <div class="input-group ls-group-input col-md-12 no-padding">
+                        <input name="agencyName" type="text" class="form-controlLogin" placeholder="Agency Name" maxlength="40">
+                    </div> 
+                    <div class="input-group ls-group-input col-md-12 no-padding">
+                        <input name="selectCountry" id="selectCountry" type="text" class="form-controlLogin" onkeyup="$('#hidden_selected_country_id').val('');" placeholder="Country Name" value="" maxlength="25">
+                    </div> 
+
+                    <div class="input-group ls-group-input col-md-12 no-padding">
+                        <input name="selectCity" id="selectCity" type="text" class="form-controlLogin" placeholder="City Name" value="" onkeyup="getCityList();"  maxlength="25">
+                    </div> 
+
+                    <div class="input-group ls-group-input col-md-12 no-padding">
+                        <input type="text" name="contactName" class="form-controlLogin" placeholder="Contact Name" value="" maxlength="40">
+                    </div> 
+
+                    <div class="input-group ls-group-input col-md-12 no-padding">
+                        <input type="text" name="emailId" id="emailId" class="form-controlLogin" placeholder="Email Id" value="" maxlength="40">
+                    </div> 
+
+                    <div class="input-group ls-group-input col-md-12 no-padding">
+                        <div class="input-group textfieldMain_mobile" style="background-color: #f3f3f3 !important; border-bottom: 1px solid #828282!Important;border: 1px solid #f3f3f3;">
+                            <div class="country_details" style="background-color: #f3f3f3 !important; width: 24px;">
+                                 <div id="iti-flag" class="iti-flag in"></div>
+                                 <div class="iti-arrow" style="right: -8px;"></div>   
+                             </div>
+                             <div class="country_dropdown">
+                                 <div class="search_country">
+                                         <input type="text" name="" class="txtfield form-control" placeholder="Search countries" id="countries_list">
+                                         <div class="search_icon"></div>
+                                 </div>
+                                 <ul class="allcountries"></ul>
+                             </div>
+                            <div class="input-group-input" style="width: 10%;">
+                                 <input type="text" class=" country_code form-control codeborder" readonly="readonly" id="mobile_code" name="countrycode" value="+91" style="padding:0px;background-color: #f3f3f3 !important;">
+                             
+                             </div>
+                             <input type="text" name="mobileNo" id="mobileno" maxlength="15" value="" class="form-controlLogin codeborder" placeholder="Mobile No.(This will be used for otp verification!)" style="background-color: #f3f3f3 !important;">
+                         </div>
+                        <!--<input type="text" name="mobileNo" class="form-controlLogin" placeholder="Mobile Number (This will be used for otp verification!)" value="" maxlength="15">-->
+                    </div> 
+
+                    <div class="input-group ls-group-input col-md-12 no-padding">
+                        <textarea class="form-controlLogin" rows="1" cols="45" maxlength="250" name="shortDetail" placeholder="Tell us about your agency"></textarea>
+                    </div> 
+                    <div class="input-group ls-group-input col-md-12 no-padding">
+                        <input name="captcha" id="captcha" class="form-controlLogin" type="text" placeholder="Captcha" maxlength="8">
+                    </div> 
+
+                    <div class="input-group ls-group-input col-md-12 no-padding">
+                         <img src="<?php echo $this->baseUrl(); ?>/public/captcha/captcha.php" alt="CAPTCHA code" id="captcha_one" height="50" style="float:left;">
+                        <a  href="javascript:void(0);" onclick="
+                                document.getElementById('captcha_one').src = '<?php echo $this->baseUrl(); ?>/public/captcha/captcha.php?' + Math.random();
+                                document.getElementById('captcha').focus();"
+                            id="change-image"> <img src="<?php echo $this->baseUrl('public/images/refresh.png'); ?>" alt="Refresh image" border="0" width="24" title="Refresh" style="margin-top:10px;">
+                        </a>
+                         <!--<div class="g-recaptcha pull-left" data-sitekey="<?php //echo RECAPTCHA_SITE_KEY; ?>"></div>-->                        
+                        <input type="hidden" name="country_id" id="hidden_selected_country_id" value=""/>
+                        <input type="hidden" name="city_id" id="hidden_selected_city_id" value=""/>
+                        <input name="submit" type="submit" id="submit" class="btn btn-primary btn-group-xs pull-right" value="Join Us">
+                        <img class="loaderimg" id="loaderimg" src="<?php echo $this->baseUrl('public/images/load1.gif'); ?>"/>
+                        <!--<button class="btn btn-primary btn-group-xs pull-right">Join Us</button>-->
+                    </div>
+                </form>
+            </div>
+            
+            <div class="form-group form-group loginCount_left registermessage" style="display: none;">
+                <h1>Congratulations!</h1>
+                <p>
+                    You have <span class="loginCount_left_blue">successfully</span> registered as a Partner with us. 
+                    We have sent you an email for your id verification, 
+                    please check your email to verify!
+                </p>
+
+            </div>
+            <div class="input-group ls-group-input col-md-12 no-padding">
+                    <a href="<?php echo $this->baseurl('login/login'); ?>" class="small loginCount_left_blue">Login Existing User</a>
+            </div>
+        </div>
+
+
+
+    </div>  
+</div>
+<!--js functions are include in 'public/js/registrationFunctions.js'-->
+
+
+<script src="<?php echo $this->baseUrl('public/js/jquery.min.js'); ?>"></script>
+<!--<link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">-->
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/jquery-ui.css'); ?>" >
+<script src="//code.jquery.com/jquery-1.10.2.js"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<script src="<?php echo $this->baseUrl('public/assets/js/editable-table/jquery.validate.js'); ?>"></script>
+
+<!--<script src="<?php echo $this->baseUrl('public/js/jquery.validate.min.js'); ?>"></script>-->
+<script src="<?php echo $this->baseUrl('public/js/constants.js'); ?>"></script> 
+<script src="<?php echo $this->baseUrl('public/js/registrationFunctions.js'); ?>"></script> 
+<script src="<?php echo $this->baseUrl('public/countrycode/script.js?rv=1144'); ?>"></script>
+<!--include custom js functions-->
+
+<script type="text/javascript">
+                            $().ready(function () {
+                                $("input[name=selectCountry]").autocomplete({
+                                    source: '/register/autosuggest-country',
+                                    minLength: 3,
+                                    focus: function (event, ui) {
+                                        event.preventDefault();
+                                        //alert(ui.item.value);               
+                                        $("#tags").val(ui.item.label);
+
+                                    },
+                                    select: function (event, ui) {
+                                        event.preventDefault();
+                                        $("input[name=selectCountry]").val(ui.item.label);
+                                        $("#hidden_selected_country_id").val(ui.item.value).trigger('change');
+                                        //set city blank
+                                        $("input[name=selectCity]").val('');
+                                        $("#hidden_selected_city_id").val('');
+                                        $.ajax({
+                                            url: '/register/countrycodeicon',
+                                            data: {countryname:ui.item.label},
+                                            method: 'POST',
+                                            type: 'json',
+                                            error: function () {
+
+                                            },
+                                            beforeSend: function () {
+
+                                            },
+                                            success: function (response) {
+                                                var data  = JSON.parse(response);
+                                                $("#iti-flag").attr('class','iti-flag '+data.iconcode+'');
+                                                $(".country_code").val("+" + data.code);
+                                            }
+                                        });
+
+                                    }
+                                });
+
+
+                            });
+
+//    $().ready(function() { 
+                            function getCityList() {
+                                $('#hidden_selected_city_id').val('');
+                                var countryId = $('#hidden_selected_country_id').val();
+
+                                $("input[name=selectCity]").autocomplete({
+                                    source: "/register/autosuggest-city?countryId=" + countryId,
+                                   minLength: 3,
+                                    focus: function (event, ui) {
+                                        event.preventDefault();
+                                        $("#tags").val(ui.item.label);
+                                    },
+                                    select: function (event, ui) {
+                                        event.preventDefault();
+                                        $("input[name=selectCity]").val(ui.item.label);
+                                        $("#hidden_selected_city_id").val(ui.item.value).trigger('change');
+
+                                    }
+                                });
+
+                            }
+//    });
+                            $(function () {
+                                $('.registermessage').hide();
+                            });
+</script>

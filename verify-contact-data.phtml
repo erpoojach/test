@@ -1,0 +1,114 @@
+
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/validationEngine.jquery.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/bootstrapValidator.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/fileinput.min.css'); ?>">
+<?php // print_r($this->verifyData); die;?>
+<h2 class="col-md-12">Your Email ID is successfully verified<br />
+    <span class="orange small"><i class="fa fa-check green"></i> <?php echo $this->verifyData['PrimaryEmail']; ?></span></h2>
+
+<?php $emailId = base64_encode($this->verifyData['PrimaryEmail']); ?>
+<span class="col-md-12" id="dispMessage">
+    <?php if (count($this->messages)) { ?>
+        <?php foreach ($this->messages as $message) { ?>
+            <?php echo $this->escape($message); ?>
+        <?php } ?>
+        <?php
+    }
+    if (!empty($this->errorMessage)) {
+        echo $this->errorMessage;
+    }
+    ?></span>
+<form method="POST" action="<?php echo $this->baseUrl("register/verify-contact-data/data/$emailId/param/otp"); ?>" name="checkotp" onsubmit="return validateOtp()">
+    <!--<div style="visibility: hidden;">div is used only for display:none, remove it -->
+    <!--<h6 class="col-md-12">Your contact number verification is completed.</h6>-->
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Email ID</label>
+            <input type="email" name="data" class="form-control whbg" value="<?php echo $this->verifyData['PrimaryEmail']; ?>" readonly>                     
+        </div>
+    </div>
+
+
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Enter OTP</label>
+            <input type="text" maxlength="6" name="mobileotp" id="mobileotp" autocomplete="OFF" class="form-control whbg">                    
+        </div>
+    </div>
+    <input type="hidden" name="regEmail" value="<?php echo $this->verifyData['PrimaryEmail']; ?>"/>
+    <input type="hidden" name="AgencyId" value="<?php echo $this->verifyData['AgencySysId']; ?>"/>
+
+    <!--</div>-->
+    <div class="col-md-12">    
+        <div class="form-group form-group1 text-right">
+            <!--<a href="personalDetails.html" class="btn btn-info"> Verify OTP</a>-->   
+            <input type="hidden" value="1" id="reGenerateOTP">
+            <span id="showsubmitbutton">
+                <span id="showregenerateOtp">
+                    <a href="javascript://" onclick="reGenerateOTP();" class="btn btn-danger">Re generate OTP</a>
+                </span>
+                <span id="submitOtp">
+                    <input type="submit" name="submit" id="submit"  value="Verify OTP" class="btn btn-warning" required> 
+                </span>
+            </span>
+
+        </div>
+    </div>
+
+</form>
+<script type="text/javascript" src="<?php echo $this->baseUrl('public/assets/js/lib/jquery-1.11.min.js'); ?>"></script>
+<script type="text/javascript" src="<?php echo $this->baseUrl('public/js/functions.js'); ?>"></script>
+<script type="text/javascript">
+    function validateOtp(){
+        var otp = $('#mobileotp').val();
+        if(otp == ''){
+            alert('Please enter otp');
+            return false;
+        }
+        return true;
+    }
+                        function reGenerateOTP() {
+                            var reGenerateOTP = $("#reGenerateOTP").val();
+                            $.ajax({
+                                type: "POST",
+                                url: "<?php echo $this->baseUrl("register/regenerate-register-otp"); ?>",
+                                async: true,
+                                data: "reGenerateOTP=" + reGenerateOTP + "&AgencyId="+<?php echo $this->verifyData['AgencySysId']; ?>+"&mobileNo="+<?php echo $this->verifyData['ContactInfo']; ?>,
+                                beforeSend: function () {
+                                    var totalhit = (parseInt(reGenerateOTP) + 1);
+                                    $('#reGenerateOTP').val(totalhit);
+                                    $('#showsubmitbutton').html('<img  src="<?php echo $this->baseUrl("public/assets/images/loader.gif"); ?>" alt="Loading" />');
+                                },
+                                success: function (data) {
+
+                                    $("#dispMessage").html(data);
+                                    if (reGenerateOTP > '3') {
+                                        $('#showsubmitbutton').html('<span id="submitOtp"><input type="submit" name="submit" id="submit"  value="Verify OTP" class="btn btn-warning pull-right"></span>');
+                                    } else {
+                                        $('#showsubmitbutton').html('<span id="showregenerateOtp"><a href="javascript://" onclick="reGenerateOTP();" style="margin-left:700px;" class="btn btn-danger pull-left">Re generate OTP</a></span><span id="submitOtp"><input type="submit" name="submit" id="submit"  value="Verify OTP" class="btn btn-warning pull-right"></span>');
+                                    }
+
+                                }
+                            });
+                        }
+</script>
+<script>
+    $(document).ready(function () {
+        $('.mobileverif').css('display', 'none');
+    });
+</script>
+
+
+<!-- Script For Icheck -->
+<script src="<?php echo $this->baseUrl('public/assets/js/icheck.min.js'); ?>"></script>
+<!-- Script For Icheck -->
+<!--Upload button Script Start-->
+<script src="<?php echo $this->baseUrl('public/assets/js/fileinput.min.js'); ?>"></script>
+<!--Upload button Script End-->
+<!--Advance Radio and checkbox demo start-->
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/checkboxRadio.js'); ?>"></script>
+<!--Advance Radio and checkbox demo start-->   
+<!--include custom js functions-->
+<script src="<?php echo $this->baseUrl('public/js/registrationFunctions.js'); ?>"></script>
+
+

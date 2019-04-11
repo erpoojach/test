@@ -1,0 +1,413 @@
+<?php
+$ownerData = $this->ownerData;
+$superadminData = $this->superadminData;
+$verifyData = $this->verifyData;
+if (@$ownerData != array()) {
+    $pdAction = 'update-personal-details';
+} else {
+    $pdAction = 'save-personal-details';
+}
+//echo '<pre>';
+////print_r($ownerData);
+//print_r($_SESSION);
+//print_r($verifyData);
+// die;
+?>
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/countrycode/style.css'); ?>" >
+<h2 class="col-md-12">Complete Your Profile</h2>
+
+<h6 class="col-md-12">Please fill your personal details below as part of your profile to complete the registration process.<br />
+    <span class="small">(Kindly fill the details of an Authorised Signatory of your company)</span></h6>
+<form id="AgencyPersonalDetailsForm" method="POST" autocomplete="off" enctype="multipart/form-data" action="/register/<?php echo $pdAction; ?>">
+    <div class="col-md-12 border-topSolid no-padding" style="padding-top:10px;">
+        <h4 class="col-md-12">Primary Contact</h4>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>First Name<span class="red">*</span></label>
+                <div class="col-md-12 no-padding"><input type="text" name="1_firstName" class="form-control whbg" maxlength="40" value="<?php echo @$ownerData['FirstName'] ? trim(@$ownerData['FirstName']) : @trim($verifyData['FirstName']); ?>"></div>                
+            </div>
+        </div>
+
+
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Last Name<span class="red">*</span></label>
+                <div class="col-md-12 no-padding"><input type="text" name="1_lastName" class="form-control whbg" maxlength="40" value="<?php echo @$ownerData['LastName'] ? trim(@$ownerData['LastName']) : @trim($verifyData['LastName']); ?>"></div>                      
+            </div>
+        </div>
+
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Designation<span class="red">*</span></label>
+                <div class="col-md-12 no-padding"><input type="text" name="1_designation" maxlength="40" class="form-control  whbg" value="<?php echo trim(@$ownerData['Designation']); ?>"></div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Mobile Number<span class="red">*</span> </label>
+                <?php 
+                    @$contactNo = explode('-', @$ownerData['ContactNo1']);
+                    $countryshortcode = Zend_Controller_Action_HelperBroker::getStaticHelper('General')->countryshortcode((isset($ownerData['countrycode']) && $ownerData['countrycode'] !=null)?str_replace('+','',trim($ownerData['countrycode'])):'91');
+                ?>
+                <div class="input-group textfieldMain_mobile">
+                    <div class="country_details">
+                         <div id="iti-flag" class="iti-flag <?=($countryshortcode !=null)?$countryshortcode:'in'?>"></div>
+                         <div class="iti-arrow"></div>   
+                     </div>
+                     <div class="country_dropdown">
+                         <div class="search_country">
+                            <input type="text" name="" class="txtfield form-control" placeholder="Search countries" id="countries_list">
+                            <div class="search_icon"></div>
+                         </div>
+                         <ul class="allcountries"></ul>
+                     </div>
+                     <div class="input-group-input">
+                         <input type="text" class=" country_code form-control codeborder" required readonly="readonly" id="mobile_code" name="1_cCode" value="<?=isset($ownerData['countrycode'])?trim($ownerData['countrycode']):'+91'; ?>" style="padding:0px;">
+                     </div>
+                     <input type="text" name="1_contactNo" id="mobileno" maxlength="15" value="<?php echo @$ownerData['ContactNo1'] ? @trim($ownerData['ContactNo1']) : @$verifyData['ContactInfo']; ?>" class="form-control whbg codeborder" >
+                </div>
+
+                <!--<div class="col-md-12 no-padding"> by sabir
+                    <div class="col-md-4 col-sm-4 col-xs-4 no-padding"><input type="text" name="1_cCode" class="form-control whbg" placeholder="Code"  maxlength="5" value="<?////= @$contactNo[0]; ?>"></div>  
+                    <div class="col-md-8 col-sm-8 col-xs-8 no-padding"><input type="text" name="1_contactNo" class="form-control  whbg" placeholder="Number" maxlength="15" value="<?php ///echo @$contactNo2[1] ? @$contactNo2[1] : @$verifyData['ContactInfo']; ?>"></div> 
+                </div> -->                 
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Contact Number </label>
+                    <?php 
+                    @$contactNo2 = explode('-', @$ownerData['ContactNo2']);
+                    $countryshortcode2 = Zend_Controller_Action_HelperBroker::getStaticHelper('General')->countryshortcode((isset($ownerData['countrycode']) && $ownerData['countrycode'] !=null)?str_replace('+','',trim($ownerData['countrycode'])):'91');
+                    ?>
+                <div class="input-group textfieldMain_mobile textfieldMain_mobile2">
+                    <div class="country_details2">
+                         <div id="iti-flag_2" class="iti-flag <?=($countryshortcode !=null)?$countryshortcode:'in'?>"></div>
+                         <div class="iti-arrow"></div>   
+                     </div>
+                    <div class="country_dropdown2">
+                         <div class="search_country">
+                            <input type="text" name="" class="txtfield form-control" placeholder="Search countries" id="countries_list2">
+                            <div class="search_icon"></div>
+                         </div>
+                         <ul class="allcountries2"></ul>
+                     </div>
+                     <div class="input-group-input">
+                         <input type="text" class=" country_code2 form-control codeborder" required readonly="readonly" id="mobile_code" name="1_mCode" value="<?=isset($ownerData['countrycode'])?trim($ownerData['countrycode']):'+91'; ?>" style="padding:5px;">
+                     </div>
+                     <input type="text" name="1_mobileNo" id="mobileno" maxlength="15" value="<?php echo @$ownerData['ContactNo2'] ? @trim($ownerData['ContactNo2']) : @$verifyData['ContactInfo']; ?>" class="form-control whbg codeborder mobile_code" >
+                </div>
+                <!--<div class="col-md-12 no-padding">
+                    <div class="col-md-4 col-sm-4 col-xs-4 no-padding"><input type="text" name="1_mCode" class="form-control whbg" placeholder="Code" maxlength="5" value="<?///= @$contactNo2[0]; ?>"></div>  
+                    <div class="col-md-8 col-sm-8 col-xs-8 no-padding"><input type="text" name="1_mobileNo" class="form-control" value="" placeholder="Contact Number" ></div> 
+                </div> -->                 
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="form-group">
+                <label>Email<span class="red">*</span></label>
+                <div class="col-md-12 no-padding"><input type="text" name="1_emailId" maxlength="40" class="form-control" value="<?php echo trim($this->verifyData['PrimaryEmail']); ?>" readonly></div>
+            </div>
+        </div>
+        <div class="clearfix"></div>
+
+        <div class="col-md-12">
+            <div class="form-group form-group1">
+                <label class="col-md-12 no-padding">Your Photo ID Proof<span class="red">*</span></label>
+                <div class="col-md-4 no-padding">
+<?php
+//$photoIdProofArray = unserialize(PHOTO_ID_PROOF); 
+$photoIdProofArray = Zend_Controller_Action_HelperBroker::getStaticHelper('General')->getMasterDocumentType(10);
+?>
+                    <select name="photoIdProof" id="photoIdProof" class="demo-default select-country" placeholder="Select" <?php echo @$ownerData['DocType'] ? 'disabled' : '' ?>>
+                        <option value="">Select Option</option>
+<?php
+if (count($photoIdProofArray) > 0) {
+    foreach ($photoIdProofArray as $proof) {
+        ?>
+                                <option value="<?php echo $proof['DocType'] . '_' . $proof['Title']; ?>" <?php echo ($proof['DocType'] == @$ownerData['DocType']) ? 'selected' : ''; ?>><?php echo $proof['Title']; ?></option>
+                                <?php
+                            }
+                        }
+                        ?>
+                    </select>
+                    <div id="errorPlacement1"></div>
+                </div> 
+                <div class="col-md-6 no-padding photoIdProDiv" style="display: <?php echo (@$ownerData['DocType'] != '') ? 'block' : 'none' ?>;"> 
+<?php if (@$ownerData['DocType'] != '') { ?>
+                    &nbsp;&nbsp;<a href="<?php echo $this->baseUrl('public/upload/media/agency/' . @trim($ownerData['AgencySysId']) . '/' . trim(@$ownerData['FilesWithTitle'])); ?>" target="_blank">Click Here To View</a>
+                    <?php } else { ?>
+                        <input id="photoIdProofFile" name="photoIdProofFile" type="file" class="file whbg" showPreview=false>
+                        <span class="small">Only allows file types of GIF, PNG, JPG, JPEG and PDF.</span>
+                    <?php } ?>
+
+                    <div id="errorPlacement2"></div>
+                </div>  
+
+                <div class="clear"></div></div>
+        </div>
+
+    </div>
+
+<!--below code is comment because superadmin login is not required for now @Pooja on 24jan2017--> 
+
+<!--    <div class="col-md-12 border-topSolid no-padding" style="padding-top:10px; display: none"> 
+
+        <h4 class="col-md-12">Operational Contact</h4>
+
+        <div class="col-md-12">
+            <div class="form-group form-group1">
+                <label>Same as primary Contact?<span class="red">*</span></label>            
+                <label class="radio inlinebl yesadd">
+                    <input class="icheck-black" type="radio" name="isSameAsPrimaryContact" id="isSameAsPrimaryContact1" onclick="dispContact();" value="Yes" <?php echo (sizeof(@$superadminData) == 0) ? 'checked' : '' ?>> Yes 
+                </label>&nbsp;
+                <label class="radio inlinebl yesadd">
+                    <input class="icheck-black" type="radio" name="isSameAsPrimaryContact" id="isSameAsPrimaryContact" onclick="dispContact();" value="No" <?php echo (sizeof(@$superadminData) > 0) ? 'checked' : '' ?>> No  
+                </label>
+                <div class="clear"></div></div>
+        </div>
+
+
+        <div class="col-md-12 no-padding corpadd" style="display:<?php echo (sizeof(@$superadminData) > 0) ? 'block' : 'none' ?>;"> 
+
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>First Name<span class="red">*</span></label>
+                    <div class="col-md-12 no-padding"><input type="text" name="2_firstName" class="form-control whbg" maxlength="40" value="<?php echo trim(@$superadminData['FirstName']); ?>"></div>                     
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Last Name<span class="red">*</span></label>
+                    <div class="col-md-12 no-padding"><input type="text" name="2_lastName" class="form-control  whbg" maxlength="40" value="<?php echo trim(@$superadminData['LastName']); ?>"></div>
+                </div>
+            </div>
+
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Designation<span class="red">*</span></label>
+                    <div class="col-md-12 no-padding"><input type="text" name="2_designation" class="form-control  whbg" maxlength="40" value="<?php echo trim(@$superadminData['Designation']); ?>"></div>                     
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Contact Number<span class="red">*</span></label>
+
+<?php @$sAdminContact1 = explode('-', @$superadminData['ContactNo1']); ?>
+                    <div class="col-md-12 no-padding">
+                        <div class="col-md-4 col-sm-4 col-xs-4 no-padding"><input type="text" name="2_cCode" class="form-control whbg" placeholder="Code" maxlength="3" value="<?= @$sAdminContact1[0]; ?>"></div>  
+                        <div class="col-md-8 col-sm-8 col-xs-8 no-padding"><input type="text" name="2_contactNo" class="form-control whbg" placeholder="Number" maxlength="10" value="<?= @$sAdminContact1[1]; ?>"></div> 
+                    </div>                  
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Mobile Number<span class="red">*</span></label>
+<?php @$sAdminContact2 = explode('-', @$superadminData['ContactNo2']); ?>
+                    <div class="col-md-12 no-padding">
+                        <div class="col-md-4 col-sm-4 col-xs-4 no-padding"><input type="text" name="2_mCode" class="form-control whbg" placeholder="Code" maxlength="3" value="<?= @@$sAdminContact2[0]; ?>"></div>  
+                        <div class="col-md-8 col-sm-8 col-xs-8 no-padding"><input type="text" name="2_mobileNo" class="form-control whbg" placeholder="Mobile Number" maxlength="10" value="<?= @@$sAdminContact2[1]; ?>"></div> 
+                    </div>                  
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="form-group">
+                    <label>Email<span class="red">*</span></label>
+                    <div class="col-md-12 no-padding"><input type="text" name="2_emailId" id="2_emailId" class="form-control whbg" maxlength="40" value="<?php echo trim(@$superadminData['EmailId']); ?>"></div>                     
+                </div>
+            </div>
+
+        </div>
+
+
+
+    </div>-->
+
+ 
+
+    <div class="col-md-12 border-topSolid no-padding" style="padding-top:10px;">
+        <h4 class="col-md-12">Communication Detail</h4>
+        <?php //echo $ownerData['EmailIdForCustomer'].'$this->verifyData[PrimaryEmail]</br>'.$this->verifyData['PrimaryEmail'];
+//        if($this->verificationSendersEmail == 'done'){
+        if(empty(trim($ownerData['EmailIdForCustomer'])) || trim($ownerData['EmailIdForCustomer']) == trim($this->verifyData['PrimaryEmail']) || $this->verifyData['IsEmailIdForCustVarified'] == 1){
+            $displayVerifyEmailButton = 'style="display: inline-block;"';
+        } else {  
+            $displayVerifyEmailButton = 'style="display: none;"';
+          } ?>
+        <div class="col-md-6">
+            <div class="form-group form-group1">
+                <label>Sender Email ID<span class="red">*</span></label>
+                <?php $emailIdforCust = !empty(trim($ownerData['EmailIdForCustomer'])) ? trim($ownerData['EmailIdForCustomer']) : @$this->verifyData['PrimaryEmail'];  ?>
+                <div class="col-md-12 no-padding"><input type="text" name="senderEmailId" id="senderEmailId" class="form-control  whbg" value="<?php echo $emailIdforCust; ?>" maxlength="40"> <img class="loaderimg" style="display: none;" id="loaderimg" src="<?php echo $this->baseUrl('public/images/load1.gif'); ?>"/>
+                    <label id="lforsenderEmailId"  class="error success" <?php echo @$displayVerifyEmailButton; ?>><i class="fa fa-check">&nbsp;&nbsp;Verified</i></label> 
+                    <?php //  if(isset($this->verificationSendersEmail)){} ?>
+                    <span class="small" >This ID will be used to send email to customer or agent for your booking.</span>                    
+                    <div id="senderEmailIderr"></div></div>
+            </div>
+        </div>
+
+<!--        <div class="col-md-6" id="verifyEmail" <?php //echo $displayVerifyEmailButton; ?>>
+            <div class="form-group form-group1">
+                <label>&nbsp;</label>
+                <div class="col-md-12 no-padding"><a>Verify Email</a>
+             </div>
+            </div>
+        </div>-->
+       
+
+    </div>
+
+
+
+
+    <div class="col-md-12">    
+        <div class="form-group form-group1 text-right">
+            <!--<button class="submit btn btn-info" type="reset" onclick="registration_process(3);" name="reset">Save &amp; Exit</button>--> 
+            <button class="submit btn btn-success" type="submit" name="<?php echo (@$ownerData != array()) ? 'edit' : 'add'; ?>" id="submitbutton">Continue</button> 
+        </div>
+    </div>
+    <?php if($ownerData['UserSysId']!=''){ ?>
+        <input type="hidden" id="primaryContactId" name="primaryContactId" value="<?php echo base64_encode($ownerData['UserSysId']); ?>"/>
+    <?php } ?>
+    
+   <?php  if($superadminData['UserSysId']!=''){ ?>
+       <input type="hidden" id="operationalContactId" name="operationalContactId" value="<?php echo base64_encode($superadminData['UserSysId']); ?>"/> 
+   <?php } ?>
+    <input type="hidden" name="AgencyId" value="<?php echo $this->verifyData['AgencySysId']; ?>"/>
+    <input type="hidden" name="regEmail" id="regEmail" value="<?php echo $this->verifyData['PrimaryEmail']; ?>"/>
+    <input type="hidden" id="IsEmailIdForCustVarified" value="<?php echo $this->verifyData['IsEmailIdForCustVarified'] ?>"/>
+    <input type="hidden" id="OldIdforCustomer" value="<?php echo trim($ownerData['EmailIdForCustomer']);?>"/>
+</form>
+<!--Advance Radio and checkbox demo start-->
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/selectTag.js'); ?>"></script>
+<?php if(!empty($ownerData['DocType'])){ ?>
+<script>
+$(document).ready(function () {
+//    alert('21312');
+   $('.selectize-input').css('background-color','#eeee !important;'); 
+});
+</script>
+<?php } ?>
+<?php
+ if(sizeof(@$superadminData) != 0){ //print_r($superadminData); ?>
+<script>
+    $('#isSameAsPrimaryContact,#isSameAsPrimaryContact1').attr('disabled', 'true');
+</script>
+<?php } ?>
+<script>
+    /*$("#file-1").fileinput({'showUpload':false, 'previewTemplates':false}); */
+</script>
+
+<!-- Script For Icheck -->
+<script src="<?php echo $this->baseUrl('public/assets/js/icheck.min.js'); ?>"></script>
+<!-- Script For Icheck -->
+<!--Advance Radio and checkbox demo start-->
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/checkboxRadio.js'); ?>"></script>
+
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/fileinput.min.css'); ?>">
+
+<!--include custom js functions-->
+<script src="<?php echo $this->baseUrl('public/js/registrationFunctions.js'); ?>"></script>
+<script src="<?php echo $this->baseUrl('public/countrycode/script.js?rv=1144'); ?>"></script>
+<script>
+    $("#photoIdProofFile").fileinput({
+        showUpload: false,
+        showRemove: false,
+        showUploadedThumbs: false
+    });
+</script>
+<style>
+    .file-preview{
+        display:none;
+    }
+    .error{
+        /*bottom: inherit;*/
+    }
+    #senderEmailIderr label{
+               position: relative!important;
+               bottom: inherit;
+    }
+     label.success,#loaderimg {
+  position: relative;
+  top: -25px;
+  right: 10px;
+  float: right;
+  width: 16px;
+  height: 16px;
+  display: inline-block;
+  color:#449D44;
+}
+</style>
+
+<script>
+
+    $(document).ready(function () {
+
+        $('#isSameAsPrimaryContact1').on('ifChecked', function () {
+            $(".corpadd").hide();
+        });
+
+        $('#isSameAsPrimaryContact').on('ifChecked', function () {
+            $(".corpadd").show();
+        });
+
+
+
+        $('#photoIdProof').on('change', function () {
+            $('#errorPlacement1').html('');
+            $(".photoIdProDiv").show();
+        });
+
+    });
+    
+function validateEmail(){
+//        var sendersEmail = $('#senderEmailId').val();
+            var formData = $("#AgencyPersonalDetailsForm").serialize();
+    //alert(formData);
+    $.ajax({
+        url: '/register/send-senders-email',
+        data: formData,
+        method: 'POST',
+        type: 'json',
+        error: function () {
+
+        },
+        beforeSend: function () {
+            $('#loaderimg').css('display', 'block');
+        },
+        success: function (result) {
+            if(result == 1){
+            alert('A verification email is sent to your email id. Please check your email.');
+            }  else if(result == 2){
+              alert('There has been error in sending email, Please try again later.'); 
+            }else {
+             alert('There has been error, Please try again later.'); 
+            }
+            $('#loaderimg').css('display', 'none');
+        }
+    });
+   }
+</script>
+
+
+
+
+
+
+
+
+
+
+

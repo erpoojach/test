@@ -1,0 +1,1701 @@
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/accordion.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/tab.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/summernote.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/custom_smart_wizard.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/autosuggest-jquery-ui.css'); ?>">
+<?php
+error_reporting(1);
+$objPackage = new Travel_Model_TblPackage();
+$numberoftraveler = $this->numberoftravler;
+$rominfojson = json_decode($numberoftraveler);
+$adultPax = 0;
+$childPax = 0;
+foreach($rominfojson as $roomarray) {
+    $adultPax += $roomarray->Adult;
+    $childPax += $roomarray->Child;
+}
+$totaltraveler = $adultPax+$childPax;
+$flexiPackageList = $this->flexiPackageList;
+$flexiPackagePlaces = $this->flexiPackagePlaces;
+$arrVehicleTypeList = $this->arrVehicleTypeList;
+$PackTypeMaskArr = str_split(@$flexiPackageList['PackTypeMask']);
+$InclMaskArr = str_split(@$flexiPackageList['InclMask']);
+//$cityresarr = json_decode(@$flexiPackageList['Cities'], true);
+if (@$flexiPackageList['EconomyMask'] == '1') {
+    $flexipacres = 'Standard';
+}
+if (@$flexiPackageList['EconomyMask'] == '2') {
+    $flexipacres = 'Deluxe';
+}
+if (@$flexiPackageList['EconomyMask'] == '3') {
+    $flexipacres = 'Luxury';
+}
+
+$flexiPackageItenList = $this->flexiPackageItenList;
+$flexiPackageCityListArr  =   array();
+for ($h = 0; $h < count($flexiPackageItenList); $h++) {
+    $flexiPackageCityListArr[$flexiPackageItenList[$h]['PlaceSysId']][] = @$flexiPackageItenList[$h]['Sequence'];
+    $cityarr[]    =   $flexiPackageItenList[$h]['Cities'];
+    $nightarr[]    =   $flexiPackageItenList[$h]['Sequence'];
+}
+$nightarr = array_values(array_unique($nightarr));
+$cityresarr = array_values(array_unique(@$cityarr));
+$totalnight = count($nightarr);
+$totaldays = count($nightarr);
+//$flexiPackageHotelList = $this->flexiPackageHotelsList;
+//$flexiPackageHotelListArr  =   array();
+//for ($h = 0; $h < count($flexiPackageHotelList); $h++) {
+//    $flexiPackageHotelListArr[@$flexiPackageHotelList[$h]['seqId']][] = @$flexiPackageHotelList[$h];
+//}
+$flexiPackageTransFixed = $this->flexiPackageTransFixed;
+for ($h = 0; $h < count($flexiPackageTransFixed); $h++) {
+    $flexiPackageTransFixedArr[$flexiPackageTransFixed[$h]['TransType']][] = $flexiPackageTransFixed[$h];
+}
+$flexiPackageActivityList = $this->flexiPackageActivityList;
+for ($h = 0; $h < count($flexiPackageActivityList); $h++) {
+    $flexiPackageActivityResult[trim($flexiPackageActivityList[$h]['Type'])][] = $flexiPackageActivityList[$h];
+}
+$flexiPackageSightseenList = $this->flexiPackageSightseenList;
+
+if(count($flexiPackageSightseenList) > 0)
+{    
+    $totalsightseeing = count($flexiPackageSightseenList);
+}
+else
+{
+    $totalsightseeing = 0;
+} 
+
+for ($h = 0; $h < count(@$flexiPackageSightseenList); $h++) {
+    $flexiPackageSightseenResult[trim(@$flexiPackageSightseenList[$h]['Type'])][] = @$flexiPackageSightseenList[$h];
+}
+$flexiPackageFlight = $this->flexiPackageFlight;
+$flexiPackageHotelsList = $this->flexiPackageHotelsList;
+
+for ($h = 0; $h < count($flexiPackageHotelsList); $h++) {
+    $cityarr[]      =   $flexiPackageHotelsList[$h]['XRefCityId'];
+    $intsysarr[]    =   $flexiPackageHotelsList[$h]['TPIntSysId'];
+    $flexiPackageHotelsListArr[$flexiPackageHotelsList[$h]['TPIntSysId']][]         =   $flexiPackageHotelsList[$h];
+    $NetDOccupCostArr[$flexiPackageHotelsList[$h]['TPIntSysId']]['NetDOccupCost'][] =   $flexiPackageHotelsList[$h]['NetDOccupCost'];
+}
+$cityarr        =   array_unique(@$cityarr);
+$intsysarr      =   array_unique(@$intsysarr);
+$frmdateres        =   @$flexiPackageList['StartDate']->format('Y-m-d');
+
+$enddate            =   strtotime(@$flexiPackageList['StartDate']->format('Y-m-d'))+(@$totaldays*86400);
+$enddateres         =   date('Y-m-d',@$enddate);
+
+$mptypearr      =	$objPackage->getMarketPlaceList();
+$currencyarr    =	$objPackage->getCurrencyList();
+
+$marketratearr = $objPackage->getCustPackageMPArr(@$flexiPackageList['TPSysId']);
+
+?>
+<section id="min-wrapper">
+    <div id="main-content">
+      <div class="container-fluid">
+        <div class="row">
+          <div class="col-md-12">
+            <!--Top header start-->
+            <h3 class="ls-top-header">Create Package</h3>
+            <!--Top header end -->
+            <!--Top breadcrumb start -->
+            <ol class="breadcrumb">
+              <li><a href="#"><i class="fa fa-home"></i></a></li>
+              <li class="active">My Inventory</li>
+              <li class="active"><a href="flexiPackageList.html">Flexi Packages</a></li>
+              <li class="active">Cost Sheet</li>
+              <div class="clear"></div>
+            </ol>
+            <!--Top breadcrumb start -->
+          </div>
+        </div>
+        <!-- Main Content Element  Start-->
+        <div class="row">
+          <div class="col-md-12">
+              <input type="hidden" accept="packageId" id="packageId" value="<?php echo @$flexiPackageList['TPSysId']?>">
+            <div class="swMain">
+              <ul class="anchor" style="margin-top:0px;">
+            <li> <a href="<?php echo $this->baseUrl('package/add-customer-package/id/'. @$flexiPackageList['TPSysId']);?>" class="done"> <span class="stepNumber">1</span> <span class="stepDesc"> Create Package </span> </a> </li>
+            <li> <a href="<?php
+                                if (count($flexiPackageList) > 0) {
+                                    echo $this->baseUrl('package/add-customer-package-itinerary/id/' . @$flexiPackageList['TPSysId']);
+                                } else {
+                                    echo '#';
+                                }
+                                ?>" class="done"> <span class="stepNumber">2</span> <span class="stepDesc"> Itinerary </span> </a> </li>
+            <li> <a href="<?php
+                                if (count($flexiPackageList) > 0) {
+                                    echo $this->baseUrl('package/add-customer-package-transport/id/' . @$flexiPackageList['TPSysId']);
+                                } else {
+                                    echo '#';
+                                }
+                                ?>" class="done"> <span class="stepNumber">3</span> <span class="stepDesc"> Transport </span> </a> </li>
+            <li> <a href="<?php
+                                if (count($flexiPackageList) > 0) {
+                                    echo $this->baseUrl('package/add-customer-package-other/id/' . @$flexiPackageList['TPSysId']);
+                                } else {
+                                    echo '#';
+                                }
+                                ?>" class="done"> <span class="stepNumber">4</span> <span class="stepDesc"> Other </span> </a> </li>
+            <li> <a href="<?php
+                                if (count($flexiPackageList) > 0) {
+                                    echo $this->baseUrl('package/add-customer-package-tnc/id/' . @$flexiPackageList['TPSysId']);
+                                } else {
+                                    echo '#';
+                                }
+                                ?>" class="done"> <span class="stepNumber">5</span> <span class="stepDesc"> T & C </span> </a> </li>
+            <li> <a href="<?php
+                                if (count($flexiPackageList) > 0) {
+                                    echo $this->baseUrl('package/add-customer-package-costsheet/id/' . @$flexiPackageList['TPSysId']);
+                                } else {
+                                    echo '#';
+                                }
+                                ?>" class="selected"> <span class="stepNumber">6</span> <span class="stepDesc"> Cost Sheet </span> </a> </li>
+          </ul>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="alert alert-info">
+              <div class="col-md-8  no-margin no-padding">
+                <h4 class="no-margin"><?php echo strtoupper(@$flexiPackageList['Title']) ?> (<?php echo @$flexipacres ?>)</h4>
+<h5 style="margin-bottom:0px;"><span id="nightcountres"><?php echo $totaldays-1?></span> Nights  <span id="daycountres"><?php echo $totaldays?></span> Days</h5>
+              </div>
+              <div class="clear"></div>
+            </div>
+          </div>
+          <div class="col-md-12">
+            <div class="panel panel-dark">
+              <div class="panel-heading">
+                <h3 class="panel-title">Cost Sheet</h3>
+              </div>
+              <div class="panel-body whbg">
+               <form name="customercostsheet" id="customercostsheet" method="post" action="">  
+                   <input type="hidden" name="TPSysId" id="TPSysId" value="<?php echo @$flexiPackageList['TPSysId']?>">
+                <div class="panel-body table-responsive no-padding">
+                  <table class="table table-bordered no-margin">
+                    <tbody>
+                      <tr class="alert alert-success">
+                        <th width="150">Particulars</th>
+                        <th width="150">Name</th>
+                        <th>Duration</th>
+                        <th>Source</th>
+                        <th>Supplier</th>
+                        <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Double Occupancy</span></th>
+                        <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Single Occupancy</span></th>
+                        <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Extra Bed </span></th>
+                        <th class="text-center" nowrap width="130">Cost-Per Child <span class="small center-block">Without Bed</span></th>
+                       
+                        <th>Booking Type</th>
+                      </tr>
+                    <input type="hidden" name="totalflight" id="totalflight" value="<?php echo count($flexiPackageFlight);?>">
+                    <input type="hidden" name="totalsightseeing" value="<?php echo $totalsightseeing;?>">
+                      <?php   
+                          
+                          $daycountair = 1;  
+                          foreach ($intsysarr as $intsysId) {
+                              $insertselected = $objPackage->InsertSelectedFlight($intsysId);
+                              $getinvflightdetails = $objPackage->GetFlightByItenary($intsysId);
+                              if(isset($getinvflightdetails)){
+                              if($getinvflightdetails['IsFromAPI'] == 1){
+                                  $flightsuppliersysID = 0;
+                              ?>
+                                  <input type="hidden" name="is_flight_api[]" value="1">
+                                  <input type="hidden" name="flightsuppliersysID[]" value="<?php echo $flightsuppliersysID;?>">
+                                  <input type="hidden" name="flightinvID[]" value="<?php echo $getinvflightdetails['InvnItemSysId'];?>">
+                                  <input type="hidden" name="flighitenaryID[]" value="<?php echo $getinvflightdetails['TPIntSysId'];?>">
+                              <?php 
+                              }
+                              else{?>
+                                 <input type="hidden" name="is_flight_api[]" value="0">
+                                 <input type="hidden" name="flightinvID[]" value="<?php echo $getinvflightdetails['InvnItemSysId'];?>">
+                                 <input type="hidden" name="flighitenaryID[]" value="<?php echo $getinvflightdetails['TPIntSysId'];?>">
+                                 <?php
+                                 $decodearr = json_decode(base64_decode($getinvflightdetails['encodedata']),true);                              
+                                 $supplierName   = $objPackage->getCustPackFlightSupplier(@$getinvflightdetails['SourcePlaceSysId'],@$getinvflightdetails['DestPlaceSysId'],@$getinvflightdetails['Cost']);
+                                 $flightsuppliersysID  = $supplierName[0]['SupplierSysId'];?>
+                                 <input type="hidden" name="flightsuppliersysID[]" value="<?php //echo $flightsuppliersysID;?>">  
+                              <?php } ?>
+                                 <tr>
+                                 <td>Day <?php echo $daycountair;?> / Flight</td>
+                                 <input type="hidden" name="flightseqID[]" value="<?php echo @$getinvflightdetails['SeqId'];?>">
+                                <?php if(@$getinvflightdetails['IsFromAPI'] == 1){ ?>
+                                <td><?php echo @$getinvflightdetails['Title']?><br><?php echo @$getinvflightdetails['FlightNumber']?></td>
+                                <input type="hidden" name="flightnumber[]" id="flightnumber" value="<?php echo @$getinvflightdetails['Title'].'_'.@$getinvflightdetails['FlightNumber']?>">
+                                <?php } else {?>
+                                <td><?php echo $decodearr['airline']?><br><?php echo @$getinvflightdetails['FlightNumber']?></td>   
+                                <input type="hidden" name="flightnumber[]" id="flightnumber" value="<?php echo $decodearr['airline'].'_'.@$getinvflightdetails['FlightNumber']?>">
+                                <?php } ?>
+                                <?php if(@$getinvflightdetails['IsFromAPI'] == 1){ ?> 
+                                <td><?php echo @$getinvflightdetails['FlyingMinutes']?> minutes</td>
+                                <input type="hidden" name="flyingmin[]" id="flyingmin" value="<?php echo @$getinvflightdetails['FlyingMinutes']?>">
+                                <?php } else { ?>
+                                <td><?php echo @$getinvflightdetails['FlyingMinutes']?> minutes</td>
+                                <input type="hidden" name="flyingmin[]" id="flyingmin" value="<?php echo @$getinvflightdetails['FlyingMinutes']?>">
+                                <?php } ?>
+
+                                <td>Internal</td>
+                                <?php if(@$getinvflightdetails['IsFromAPI'] == 1){ ?> 
+                                <td>API</td>
+                                <?php } else { ?>
+                                <td><?php echo @$supplierName[0]['SupplierName']?></td>
+                                <?php } ?>
+
+                                <input type="hidden" name="suppliername[]" id="suppliername" value="<?php echo @$supplierName[0]['SupplierName']?>">
+                                <input type="hidden" name="totaltraveller" id="totaltraveller" value="<?php echo $totaltraveler;?>">
+                                <input type="hidden" name="adultPax" id="adultPax" value="<?php echo $adultPax;?>">
+                                <input type="hidden" name="childPax" id="childPax" value="<?php echo $childPax;?>">
+                                <td><input type="text" name="flightpackcostdo[]" class="form-control whbg calccost" value="<?php echo @$getinvflightdetails['Cost']?>"></td>
+                                <td><input type="text" name="flightpackcostso[]" class="form-control whbg calcsocost" value="<?php echo @$getinvflightdetails['Cost']?>"></td>
+                                <td><input type="text" name="flightpackcosteb[]" class="form-control whbg calcebcost" value="<?php echo @$getinvflightdetails['Cost']?>"></td>
+                                <td><input type="text" name="flightpackcostwb[]" class="form-control whbg calcwthbcost" value="<?php echo @$getinvflightdetails['Cost']?>"></td>
+
+                                <td>On request</td>
+                              </tr>
+                              <?php
+                          $daycountair = $daycountair + 1; } } ?>    
+
+                      <input type="hidden" name="totalhotel" id="totalhotel" value="<?php echo count($flexiPackageHotelsListArr);?>">
+                      
+                      <?php 
+                      $daycount = 1;
+                      foreach ($intsysarr as $intsysId) {
+                          
+                          $insertselected = $objPackage->InsertSelectedHotel($intsysId);
+                          $gethoteldetails = $objPackage->GetHotelByItenary($intsysId); 
+      
+                        ?>
+                      <tr>
+                        <td>Day <?php echo $daycount;?> / Hotel</td>
+                        <td><?php echo @$gethoteldetails['Title'];?></td>
+                        <input type="hidden" name="is_hotel_api[]" value="0">
+                        <input type="hidden" name="hotelitenaryID[]" value="<?php echo @$gethoteldetails['TPIntSysId']?>">
+                        <input type="hidden" name="hotelinventoryID[]" value="<?php echo @$gethoteldetails['AccoSysId']?>">
+                        <input type="hidden" name="hotelsuppsysID[]" value="<?php echo @$gethoteldetails['SupplierSysId']?>">
+                        <input type="hidden" name="hotelseqID[]" value="<?php echo @$gethoteldetails['SeqId']?>">
+                        <input type="hidden" name="hoteltile[]" id="hoteltile" value="<?php echo @$gethoteldetails['Title'];?>">
+                        <td><?php echo $daycountres?> Nights</td>
+                        <input type="hidden" name="daycounts[]" id="daycounts" value="<?php echo $daycountres?>">
+                        <td>Internal</td>
+                        <?php
+                            if($gethoteldetails['IsFromAPI'] == '1'){
+                        ?>
+                            <td>API</td>
+                        <?php } else { ?>    
+                            <td><?php echo @$gethoteldetails['SupplierName'];?></td>
+                            <input type="hidden" name="hotelsuppliername[]" id="hotelsuppliername" value="<?php echo @$gethoteldetails['SupplierName'];?>">
+                        <?php } ?>
+                         <?php
+                            if($gethoteldetails['IsFromAPI'] == '0'){
+                        ?>
+                        <td><input type="text" name="costdo[]" id="costdo" value="<?php echo round(@$gethoteldetails['TotalCostDO']);?>" class="form-control whbg calccost"></td>
+                        <td><input type="text" name="costso[]" id="costso" value="<?php echo round(@$gethoteldetails['TotalCostSO']);?>" class="form-control whbg calcsocost"></td>
+                        <td><input type="text" name="costwithbed[]" id="costwithbed" value="<?php echo round(@$gethoteldetails['TotalCostExtraBed']);?>" class="form-control whbg calcebcost"></td>
+                        <td><input type="text" name="costwobed[]" id="costwobed" value="<?php echo round(@$gethoteldetails['TotalCostWithoutBed']);?>" class="form-control whbg calcwthbcost"></td>
+                         <?php } else {
+                             ?>
+                            <td><input type="text" name="costdo[]" id="costdo" value="<?php echo round(@$gethoteldetails['TotalCost']);?>" class="form-control whbg calccost"></td>
+                            <td><input type="text" name="costso[]" id="costso" value="<?php echo round(@$gethoteldetails['TotalCost']);?>" class="form-control whbg calcsocost"></td>
+                        <td><input type="text" name="costwithbed[]" id="costwithbed" value="<?php echo round(@$gethoteldetails['TotalCost']);?>" class="form-control whbg calcebcost"></td>
+                        <td><input type="text" name="costwobed[]" id="costwobed" value="<?php echo round(@$gethoteldetails['TotalCost']);?>" class="form-control whbg calcwthbcost"></td>
+                         <?php } ?>
+                        <td>On request</td>
+                      </tr>
+                    <?php     $mnrate++;                              
+                    $daycount = $daycount+1;
+                    
+                    }     ?>   
+                      <input type="hidden" name="totalactitvity" id="totalactitvity" value="<?php echo count($flexiPackageActivityList);?>">
+                    <?php 
+                    //echo '<pre>';
+                    //print_r($flexiPackageActivityList);
+                    $supplierName = array();
+                    $flexiPackageActivityList = @$flexiPackageActivityResult['Included'];
+                        for($pa=0;$pa<count($flexiPackageActivityList);$pa++) { 
+                        $dayscount = $pa+1;
+                            
+                        $supplierName   = $objPackage->getCustPackActSupplier($flexiPackageActivityList[$pa]['TPActivitySysId'],$flexiPackageActivityList[$pa]['Cost']);
+                        ?>   
+                      <input type="hidden" name="activityitenaryID[]" value="<?php echo $flexiPackageActivityList[$pa]['TPIntSysId'];?>">
+                      <input type="hidden" name="activitysequenceID[]" value="<?php echo $flexiPackageActivityList[$pa]['Sequence'];?>">
+                      <input type="hidden" name="activityinventID[]" value="<?php echo $flexiPackageActivityList[$pa]['InvnItemSysId'];?>">
+                      <input type="hidden" name="activitysuppID[]" id="activitysuppID" value="<?php echo @$supplierName[0]['SupplierSysId']?>">
+                      <input type="hidden" name="suppliersysactvityID[]" value="<?php echo $supplierName[$pa]['SupplierSysId']?>">
+                      <tr>
+                        <td>Day <?php echo $dayscount;?> / Activity</td>
+                        <input type="hidden" name="activitytitle[]" id="activitytitle" value="<?php echo @$flexiPackageActivityList[$pa]['Title'];?>">
+                        <td><?php echo @$flexiPackageActivityList[$pa]['Title']?></td>
+                        <td><?php echo @$flexiPackageActivityList[$pa]['DurationStr']?> min.</td>
+                        <input type="hidden" name="activityduration[]" id="activityduration" value="<?php echo @$flexiPackageActivityList[$pa]['DurationStr']?>">
+                        <td>Internal</td>
+                        <td><?php echo @$supplierName[0]['SupplierName']?></td>
+                        <input type="hidden" name="activitysuppname[]" id="activitysuppname" value="<?php echo @$supplierName[0]['SupplierName']?>">
+                        <td><input type="text" name="activitycost[]" id="activitycost" class="form-control whbg calccost" value="<?php echo $flexiPackageActivityList[$pa]['Cost']?>"></td>
+                        <td><input type="hidden" class="calcsocost" value="<?php echo $flexiPackageActivityList[$pa]['Cost']?>">NA</td>
+                        <td><input type="hidden" class="calcebcost" value="<?php echo $flexiPackageActivityList[$pa]['Cost']?>">NA</td>
+                        <td><input type="hidden" class="calcwthbcost" value="<?php echo $flexiPackageActivityList[$pa]['Cost']?>">NA</td>
+                        <td><?php echo $flexiPackageActivityList[$pa]['Type']?></td>
+                      </tr>
+                          <?php } ?>
+                      <?php                       
+                        $flexiPackageSightseenList = @$flexiPackageSightseenResult['Included'];
+                        for($pa=0;$pa<count(@$flexiPackageSightseenList);$pa++) { 
+                        $supplierName   = $objPackage->getCustPackSSSupplier(@$flexiPackageSightseenList[$pa]['SSSysId'],@$flexiPackageSightseenList[$pa]['Cost']);
+                        $dayscountsightseeing = $pa+1;
+                      ?> 
+                      <input type="hidden" name="totalsightseeing" value="<?php echo $totalsightseeing;?>">
+                      <input type="hidden" name="sightitenaryID[]" value="<?php echo @$flexiPackageSightseenList[$pa]['InvnItemSysId']?>">
+                      <input type="hidden" name="sightsequenceID[]" value="<?php echo @$flexiPackageSightseenList[$pa]['SeqId']?>">
+                      <input type="hidden" name="sightinventID[]" value="<?php echo @$flexiPackageSightseenList[$pa]['XrefInvnItemSysId'];?>">
+                      <input type="hidden" name="sightsuppID[]" id="activitysuppID" value="<?php echo @$supplierName[0]['SupplierSysId']?>">
+                      <tr>
+                        <td>Day <?php echo $dayscountsightseeing;?> / Sightseen</td>
+                        <td><?php echo @$flexiPackageSightseenList[$pa]['Title']?></td>
+                        <input type="hidden" name="sightseeing[]" id="sightseeing" value="<?php echo @$flexiPackageSightseenList[$pa]['Title']?>">
+                        <td><?php echo @$flexiPackageSightseenList[$pa]['DurationStr']?></td>
+                        <input type="hidden" name="sightduration[]" id="sightduration" value="<?php echo @$flexiPackageSightseenList[$pa]['DurationStr']?>">
+                        <td>Internal</td>
+                        <td><?php echo @$supplierName[0]['SupplierName']?></td>
+                        <input type="hidden" name="sightsupplier[]" id="sightsupplier" value="<?php echo @$supplierName[0]['SupplierName']?>">
+                        <td><input type="text" name="sightseeingcost[]" id="sightseeingcost" class="form-control whbg calccost" value="<?php echo @$flexiPackageSightseenList[$pa]['Cost']?>"></td>
+                        <td><input type="hidden" class="calcsocost" value="<?php echo @$flexiPackageSightseenList[$pa]['Cost']?>">NA</td>
+                        <td><input type="hidden" class="calcebcost" value="<?php echo @$flexiPackageSightseenList[$pa]['Cost']?>">NA</td>
+                        <td><input type="hidden" class="calcwthbcost" value="<?php echo @$flexiPackageSightseenList[$pa]['Cost']?>">NA</td>
+                        <td><?php echo @$flexiPackageSightseenList[$pa]['Type']?></td>
+                      </tr>
+                          <?php } ?>
+                      <tr class="alert-info">
+                        <td><strong>Total</strong></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td></td>
+                        <td class="costresult">0</td>
+                        <td class="costsores">0</td>
+                        <td class="costextrabedres">0</td>
+                        <td class="costwithoutbedres">0</td>
+                        <td></td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+               
+               </form>
+               <!--Table Wrapper Finish-->
+              </div>
+              <div class="panel-body  whbg">
+                <div class="panel panel-primary">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Optional Inclusions</h3>
+                  </div>
+                  <div class="panel-body whbg no-padding">
+                    <div class=" table-responsive " style="padding-top:15px;">
+                      <table class="table table-bordered  no-margin">
+                        <tr class="alert alert-info">
+                            <th>Type</th>
+                          <th>Particulars</th>
+                          <th>Title</th>
+                          <th>Cost/Person</th>
+                          <th>Mark-up (%)</th>
+                          <th>Total Cost</th>
+                        </tr>
+                        <?php 
+                          $flexiPackageActivityList = @$flexiPackageActivityResult['Optional'];
+                          for($pa=0;$pa<count($flexiPackageActivityList);$pa++) { 
+                              if($flexiPackageActivityList[$pa]['Markup']>0){
+                              $markuprate = ($flexiPackageActivityList[$pa]['Cost']*$flexiPackageActivityList[$pa]['Markup'])/100;
+                              }
+                        ?>                      
+                      <tr>
+                        <td><?php echo $flexiPackageActivityList[$pa]['Type']?></td>
+                        <td>Activity day <?php echo $flexiPackageActivityList[$pa]['Sequence']?></td>
+                        <td><?php echo $flexiPackageActivityList[$pa]['Title']?></td>                        
+                        <td><?php echo $flexiPackageActivityList[$pa]['Cost']?></td>
+                        <td><input class="form-control whbg" onchange="return updateopinclmarkup('<?php echo $flexiPackageActivityList[$pa]['TPIntSysId']?>','<?php echo $flexiPackageActivityList[$pa]['TPActivitySysId']?>','<?php echo $flexiPackageActivityList[$pa]['Sequence']?>','<?php echo $flexiPackageActivityList[$pa]['Cost']?>')" type="text" name="markup_<?php echo $flexiPackageActivityList[$pa]['TPIntSysId']?>_<?php echo $flexiPackageActivityList[$pa]['TPActivitySysId']?>_<?php echo $flexiPackageActivityList[$pa]['Sequence']?>" id="markup_<?php echo $flexiPackageActivityList[$pa]['TPIntSysId']?>_<?php echo $flexiPackageActivityList[$pa]['TPActivitySysId']?>_<?php echo $flexiPackageActivityList[$pa]['Sequence']?>" value="<?php echo $flexiPackageActivityList[$pa]['Markup']?>"></td>                   
+                        <td id="markres_<?php echo $flexiPackageActivityList[$pa]['TPIntSysId']?>_<?php echo $flexiPackageActivityList[$pa]['TPActivitySysId']?>_<?php echo $flexiPackageActivityList[$pa]['Sequence']?>"><?php echo $flexiPackageActivityList[$pa]['Cost']+@$markuprate?></td>                       
+                      </tr>
+                          <?php } ?>
+                      <?php 
+                          $flexiPackageSightseenList = @$flexiPackageSightseenResult['Optional'];
+                             
+                          
+                          
+                          for($pa=0;$pa<count(@$flexiPackageSightseenList);$pa++) { 
+                              if(@$flexiPackageSightseenList[$pa]['Markup']>0){
+                              $markuprate = (@$flexiPackageSightseenList[$pa]['Cost']*@$flexiPackageSightseenList[$pa]['Markup'])/100;
+                              }
+                        ?>                      
+                      <tr>
+                        <td><?php echo @$flexiPackageSightseenList[$pa]['Type']?></td>
+                        <td>Sightseen <?php echo @$flexiPackageSightseenList[$pa]['Sequence']?></td>
+                        <td><?php echo @$flexiPackageSightseenList[$pa]['Title']?></td>                        
+                        <td><?php echo @$flexiPackageSightseenList[$pa]['Cost']?></td>
+                        <td><input class="form-control whbg" onchange="return updateopinclmarkup('<?php echo @$flexiPackageSightseenList[$pa]['TPSysId']?>','<?php echo @$flexiPackageSightseenList[$pa]['SSSysId']?>','<?php echo @$flexiPackageSightseenList[$pa]['Sequence']?>','<?php echo @$flexiPackageSightseenList[$pa]['Cost']?>')" type="text" name="markup_<?php echo @$flexiPackageSightseenList[$pa]['TPSysId']?>_<?php echo $flexiPackageSightseenList[$pa]['SSSysId']?>_<?php echo @$flexiPackageSightseenList[$pa]['Sequence']?>" id="markup_<?php echo @$flexiPackageSightseenList[$pa]['TPSysId']?>_<?php echo $flexiPackageSightseenList[$pa]['SSSysId']?>_<?php echo @$flexiPackageSightseenList[$pa]['Sequence']?>" value="<?php echo @$flexiPackageSightseenList[$pa]['Markup']?>"></td>                   
+                        <td id="markres_<?php echo @$flexiPackageSightseenList[$pa]['TPSysId']?>_<?php echo @$flexiPackageSightseenList[$pa]['SSSysId']?>_<?php echo @$flexiPackageSightseenList[$pa]['Sequence']?>"><?php echo @$flexiPackageSightseenList[$pa]['Cost']+@$markuprate?></td>                       
+                      </tr>
+                          <?php } ?>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+                <div class="panel-body  whbg">
+                <div class="panel panel-primary">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Fixed Transport</h3>
+                  </div>
+                  <div class="panel-body whbg no-padding">
+                    <div class=" table-responsive " style="padding-top:15px;">
+                      <table class="table table-bordered  no-margin">
+                        <tr class="alert alert-info">
+                          <th>Type</th>
+                          <th>Particulars</th>                          
+                          <th>Cost/Person</th>                          
+                        </tr>
+                        <?php 
+                          for ($h = 0; $h<count($flexiPackageTransFixed); $h++) {
+                              if($flexiPackageTransFixed[$h]['TransType']=='car') {
+                                  $frmval = 'Type : '.ucfirst($flexiPackageTransFixed[$h]['TransTypeCat']);
+                                  $toval  = 'Capacity : '.$flexiPackageTransFixed[$h]['Capacity'];
+                                  $cost   = round($flexiPackageTransFixed[$h]['CostPerson']/@$flexiPackageTransFixed[$h]['Capacity']);
+                              } else {
+                                  $frmval = 'From : '.ucfirst($flexiPackageTransFixed[$h]['FromPlace']);
+                                  $toval  = 'To : '.ucfirst($flexiPackageTransFixed[$h]['ToPlace']);
+                                  $cost   = $flexiPackageTransFixed[$h]['CostPerson'];
+                              }
+                        ?>                      
+                        <tr>
+                        <td><?php echo ucfirst($flexiPackageTransFixed[$h]['TransType'])?></td>
+                        <td><?php echo @$frmval?><br><?php echo @$toval?></td>                         
+                        <td><?php echo @$cost?><input type="hidden" id="fixedtransport_<?php echo $flexiPackageTransFixed[$h]['TransType'];?>" class="fixedcost" value="<?php echo @$cost?>"></td>
+                        <?php if($flexiPackageTransFixed[$h]['TransType'] == "car"){ ?>
+                        <input type="hidden"  class="fixedcostcar" value="<?php echo @$cost?>">
+                        <?php } ?>
+                        </tr>
+                          <?php } ?>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="panel-body whbg">
+                <div class=" panel  panel-info   whbg">
+                  <div class="panel-heading">
+                    <h3 class="panel-title">Market Wise Rate Sheet</h3>
+                  </div>
+                  <div class="col-md-4  panel-body  whbg" id="marktype">
+                    <div class="form-group no-margin">
+                      <label>Mark up / Commission Type</label>
+                      <select id="MarkType" name="MarkType" class="demo-default select-country" placeholder="Select">
+                        <option value="">Select</option>
+                        <option value="FixedAmount">Fixed Amount</option>
+                        <option value="FixedPercnt">Fixed %</option>
+                      </select>
+                    </div>
+                  </div>
+                    <div class="col-md-4  alert  whbg" id="marktype">
+                    <div class="form-group no-margin">
+                      <label>Market Place</label>
+                      <select id="marketPlace" name="marketPlace" class="demo-default select-country" placeholder="Select">
+                        <option value="">Select</option>
+                        <?php for($p=0;$p<count(@$mptypearr);$p++) { ?>
+                        <option value="<?php echo @$mptypearr[$p]['MPType']?>_<?php echo @$mptypearr[$p]['Title']?>" selected><?php echo @$mptypearr[$p]['Title']?></option>     
+                        <?php } ?>
+                      </select>
+                    </div>
+                  </div>
+<!--                    <div class="col-md-4  alert  whbg" id="marktype">
+                    <div class="form-group no-margin">
+                      <label>Currency</label>
+                      <select id="currency" name="currency" class="demo-default select-country" placeholder="Select">
+                        <option value="">Select</option>
+                        <?php for($p=0;$p<count($currencyarr);$p++) { ?>
+                        <option value="<?php echo $currencyarr[$p]['CurrencyType']?>_<?php echo $currencyarr[$p]['Symbol']?>" <?php if(@$currencyarr[$p]['CurrencyType']==@$packratearr[@$reseconomyid[1]][0]['CurrencyType']) { echo 'selected'; } else { } ?>><?php echo $currencyarr[$p]['Symbol']?></option>     
+                        <?php } ?>
+                      </select>
+                    </div>
+                  </div>-->
+                  <div class="col-md-12 no-padding costomizetab">
+                    <div class="panel-body table-responsive no-padding no-border">
+                      <table class="table table-bordered no-margin" id="costmarkupres">
+                        <tr class="alert alert-success">                          
+                          <th><strong>Permission</strong></th>
+                          <th><strong>Mark up</strong></th>
+                          <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Double Occupancy</span></th>
+                          <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Single Occupancy</span></th>
+                          <th class="text-center" nowrap width="130">Cost PP <span class="small center-block">Extra Bed </span></th>
+                          <th class="text-center" nowrap width="130">Cost-Per Child <span class="small center-block">Without Bed</span></th>
+                          <td class="text-center small"><strong>Tax (%)</strong></td>
+                          <th><strong>Action</strong></th>
+                        </tr>
+                        </tr>
+                        
+                        <tr class="alert alert-warning">
+                          <td colspan="2" class="text-center"><strong>Published Fare <i class="fa fa-long-arrow-right"></i></strong></td>
+                          <td class="text-center small"><strong><span class="costresult1" id="NewCostDO"></span></strong></td>
+                          <td class="text-center small"><strong><span class="costsores1" id="NewCostSO"></span></strong></td>
+                          <td class="text-center small"><strong><span class="costextrabedres1" id="NewCostExtraBed"></span></strong></td>
+                          <td class="text-center small"><strong><span class="costwithoutbedres1" id="NewCostWithoutBed"></span></strong></td>
+                          <td class="text-center small"></td>
+                          <td>&nbsp;</td>
+                        </tr>
+                        <tr>                            
+                          <td><select id="permission" name="permission" class="demo-default select-country" placeholder="Select" style="width:110px;">
+                              <option value="">Select</option>
+                              <option value="1">Allow</option>
+                              <option value="0">Not Allowed</option>
+                            </select>
+                          </td>
+                          <td><input type="text" class="form-control whbg " id="markup" name="markup" onchange="return updatemarkup()"></td>
+                          <td><input type="text" class="form-control whbg " id="doubleoccupancy" name="doubleoccupancy"></td>
+                          <td><input type="text" class="form-control whbg " id="singleoccupancy" name="singleoccupancy"></td>                          
+                          <td><input type="text" class="form-control whbg " id="extrabed" name="extrabed"></td>
+                          <td><input type="text" class="form-control whbg " id="withoutbed" name="withoutbed"></td>
+                          <td>
+                              <select id="tax" name="tax" class="demo-default select-country" placeholder="Select">
+                              <option value="Included">Included</option>
+                              <option value="Excluded" selected>Excluded</option>
+                            </select>
+                            <input type="text" class="form-control whbg" id="taxres" name="taxres">
+                          </td>
+                          <td><a class="btn btn-success btn-sm tooltipLink"  data-placement="top" data-toggle="tooltip" data-original-title="Add" href="javascript:void(0);" onclick="marketplacerate('<?php echo @$frmdateres?>','<?php echo @$enddateres?>')"><i class="fa fa-fw fa-arrows"></i></a> </td>
+                        </tr> 
+                       <?php for($z=0;$z<count(@$marketratearr);$z++) { ?>
+                        <tr>                            
+                          <td><?php echo @$marketratearr[$z]['Permission']?>
+                          </td>
+                          <td><?php echo @$marketratearr[$z]['MarkPercent']?></td>
+                          <td><?php echo @$marketratearr[$z]['CostPPDO']?></td>
+                          <td><?php echo @$marketratearr[$z]['CostPPSO']?></td>                          
+                          <td><?php echo @$marketratearr[$z]['CostExtraBed']?></td>
+                          <td><?php echo @$marketratearr[$z]['CostChildWithoutBed']?></td>
+                          <td> <?php echo @$marketratearr[$z]['Tax']?> 
+                            <?php echo @$marketratearr[$z]['ExcludedPercent']?>
+                          </td>
+                          <td><a class="btn btn-success btn-sm tooltipLink"  data-placement="top" data-toggle="tooltip" data-original-title="Delete" href="javascript:void(0);" onclick="deletemarketplacerate('<?php echo $this->tpsysID;?>')"><i class="fa fa-trash-o"></i></a> </td>
+                        </tr> 
+                        <?php } ?>
+                      </table>
+                    </div>
+                  </div>
+                  <div class="clear"></div>
+                </div>
+              </div>
+              <div class="panel-body whbg no-padding">
+                <div class="col-md-6">
+                  <div class="panel panel-primary">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Pax limitation</h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                      <table class="table table-bordered no-margin">
+                        <tbody>
+                          <tr class="alert alert-info">
+                            <th></th>
+                            <th>Adult</th>                            
+                          </tr>
+                          <tr>
+                            <td>Minimum Pax Allowed</td>
+                            <td><select onchange="updateminpax('<?php echo @$flexiPackageList['TPSysId']?>')" id="minpax" name="minpax" class="demo-default select-country" placeholder="Select">
+                                <option value="1" <?php if(@$flexiPackageList['MinPax']=='1') { echo 'selected'; } else { } ?>>1</option>
+                                <option value="2" <?php if(@$flexiPackageList['MinPax']=='2') { echo 'selected'; } else { } ?>>2</option>
+                                <option value="3" <?php if(@$flexiPackageList['MinPax']=='3') { echo 'selected'; } else { } ?>>3</option>                                
+                              </select>
+                            </td>                            
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                <div class="col-md-6">
+                  <div class="panel panel-primary">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Booking Rules</h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                      <table class="table table-bordered no-margin"> 
+                        <tbody>
+                            <?php 
+                            if($flexiPackageList['AdvBookingPercent']<1){ 
+                                $advbook        = '10';
+                            } else {
+                                $advbook        = $flexiPackageList['AdvBookingPercent'];
+                            }
+                            if($flexiPackageList['AdvBookingDays']<1){ 
+                                $advbookdays        = '30';
+                            }      else {
+                                $advbookdays        = $flexiPackageList['AdvBookingDays'];
+                            }                  
+                            ?>
+                          <tr>
+                            <td>Advance</td>
+                            <td><input onchange="updateminpax('<?php echo @$flexiPackageList['TPSysId']?>')" name="advancerule" id="advancerule" type="text" class="form-control whbg pull-left" style="width:85%;" value="<?php echo @$advbook?>">
+                              &nbsp;&nbsp;%</td>
+                            <td>at the time of confirmation</td>
+                          </tr>
+                          <tr>
+                            <td>Balance before</td>
+                            <td><input onchange="updateminpax('<?php echo @$flexiPackageList['TPSysId']?>')" name="balancerule" id="balancerule" type="text" class="form-control whbg pull-left" style="width:85%;" value="<?php echo @$advbookdays?>">
+                              &nbsp;&nbsp;days</td>
+                            <td>before the departure date</td>
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                  <div class="col-md-6">
+                  <div class="panel panel-primary">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Discount</h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                      <table class="table table-bordered no-margin">
+                        <tbody>
+                          <tr>
+                            <td>
+                            <select onchange="updateminpax('<?php echo @$flexiPackageList['TPSysId']?>')" id="DiscountType" name="DiscountType" class="demo-default select-country" placeholder="Select" style="width:150px;">                        
+                            <option value="1" <?php if($flexiPackageList['DiscountType']=='1') { echo 'selected'; } ?>>Fixed Amount</option>
+                            <option value="2" <?php if($flexiPackageList['DiscountType']=='2') { echo 'selected'; } ?>>Fixed %</option>
+                            </select>
+                            </td>
+                            <td><input onchange="updateminpax('<?php echo @$flexiPackageList['TPSysId']?>')" name="DiscountVal" id="DiscountVal" type="text" class="form-control whbg pull-left" style="width:85%;" value="<?php if($flexiPackageList['DiscountVal']>0) { echo @$flexiPackageList['DiscountVal']; } else { echo '0'; } ?>">
+                            </td>                            
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+                  
+                  <div class="col-md-6">
+                  <div class="panel panel-primary">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Price Range</h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                      <table class="table table-bordered no-margin">
+                        <tbody>
+                          <tr>
+                            <td><input onblur="updatepricerange('<?php echo @$flexiPackageList['TPSysId']?>')" name="pricerange" id="pricerange" type="text" class="form-control whbg pull-left" style="width:85%;" value="<?php if($flexiPackageList['PriceRange']) { echo @$flexiPackageList['PriceRange']; } else { echo '0'; } ?>">
+                            </td>                            
+                          </tr>
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <div class="panel-body whbg">
+                <div class="col-md-12 no-padding">
+                  <div class="panel panel-danger">
+                    <div class="panel-heading">
+                      <h3 class="panel-title">Cancellation</h3>
+                    </div>
+                    <div class="panel-body table-responsive no-padding">
+                        <table class="table table-bordered no-margin" name="cancellationres" id="cancellationres">
+                        <tbody>
+                          <tr>
+                            <td>Before
+                                <select class="demo-default" placeholder="Select" name="cancel" id="cancel">
+                                    <option value="90">90</option>
+                                    <option value="60">60</option>
+                                    <option value="30">30</option>
+                                    <option value="15">15</option>
+                                    <option value="7">7</option>
+                                    <option value="3">3</option>
+                              </select>
+                              Days</td>
+                            <td><input type="email" class="form-control whbg pull-left" style="width:50px;" name="cancelpercnt" id="cancelpercnt">
+                              <span class="pull-left">&nbsp;%&nbsp;&nbsp;+&nbsp;&nbsp;</span>
+                              <input class="form-control whbg pull-left" style="width:70px;" type="email" name="cancelres" id="cancelres">
+                              &nbsp;<span class="fa fa-inr"></span></td>
+                            <td><a href="#" class="btn btn-success btn-sm tooltipLink"  data-placement="top" data-toggle="tooltip" data-original-title="Add" onclick="cancelpolicy()"><i class="fa fa-fw fa-arrows"></i></a></td>
+                          </tr>
+                          
+                        </tbody>
+                      </table>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+          <div class="col-md-12 no-padding no-margin">
+              <div class="panel-footer text-right">
+                  <!--<a target="_blank" href="<?php //echo $this->baseUrl('package/view-customer-final-package/id/'.@$flexiPackageList['TPSysId']);?>" class="btn btn-primary pull-left"><i class="fa fa-image"></i> View Package</a> !-->&nbsp;&nbsp;
+                  <a data-toggle="modal" class="btn btn-success" href="javascript:void(0);" onclick="return updatepackagecostsheet();">Finish</a> &nbsp;&nbsp;
+                  <button class="btn btn-default" type="cancel">Cancel</button>
+            </div>
+          </div>
+        </div>
+        <!-- Main Content Element  End-->
+      </div>
+    </div>
+    <?php echo $this->render('copyrightfooter.phtml'); ?>
+  </section>
+<!--Page main section end -->
+<!--Right hidden  section start-->
+<?php echo $this->render('newfooter.phtml'); ?>
+<div class="modal fade" id="myModa1activities" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">View Activities</h4>
+      </div>
+      <div class="modal-body">
+        <div class="panel-body table-responsive no-padding">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Activities Name</th>
+                <th>Price</th>
+                <th>Type</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Historical Walking Tour</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Included</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Turnt Up Nightclub Crawl</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Optional</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning btn-round" data-dismiss="modal">Submit</button>
+        <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="myModa1transport" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel">View Activities</h4>
+      </div>
+      <div class="modal-body">
+        <div class="panel-body table-responsive no-padding">
+          <table class="table table-bordered">
+            <thead>
+              <tr>
+                <th>Vehicle Name</th>
+                <th>Price</th>
+                <th>Type</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Indiac car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>SIC</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Innova Car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Pvt</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Indiac car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>SIC</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Innova Car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Pvt</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Indiac car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>SIC</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Innova Car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Pvt</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Indiac car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>SIC</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Innova Car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Pvt</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Indiac car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>SIC</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+              <tr>
+                <td>Innova Car</td>
+                <td><strong><i class="fa fa-inr"></i> 3400</strong></td>
+                <td>Pvt</td>
+                <td><label class="checkbox inlinebl no-margin">
+                  <input class="icheck-green" type="checkbox" id="inlineCheckboxNew" value="option1">
+                  Select </label></td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-warning btn-round" data-dismiss="modal">Submit</button>
+        <button type="button" class="btn btn-default btn-round" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="myModa1changeflight" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header no-border-btm" style="position:relative;">
+        <ul class="nav nav-tabs icon-tab">
+          <li class="active"><a data-toggle="tab" href="#home">TripsBank Results</a></li>
+          <li><a data-toggle="tab" href="#profile">Internal Results</a></li>
+          <li><a data-toggle="tab" href="#messages">API Results</a></li>
+        </ul>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="position:absolute; right:20px; top:15px;">&times;</button>
+        <div class="clear"></div>
+      </div>
+      <div class="col-md-12 no-border-bottom">
+        <div class="col-md-8" style="padding-left:0px;">
+          <div class="col-md-12 panel panel-default no-margin no-padding">
+            <div class="panel-heading">
+              <h6 class="no-margin"><i class="fa fa-filter"></i> Filter By</h6>
+            </div>
+            <div class="col-md-6" style="margin:2px 0px;">
+              <div class="form-group form-group1 no-margin">
+                <label>Airlines</label>
+                <select id="select-state1" name="state[]" multiple class="demo-default select-state">
+                  <option value="">Any</option>
+                  <option value="AL">Spice Jet</option>
+                  <option value="AK">Indigo</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6" style="margin:2px 0px;">
+              <div class="form-group form-group1 no-margin">
+                <label>Stops</label>
+                <select id="select-state1" name="state[]" multiple class="demo-default select-state">
+                  <option value="">Any</option>
+                  <option value="AL">Nonstop</option>
+                  <option value="AK">1 Stop</option>
+                </select>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+        </div>
+        <div class="col-md-4 panel panel-default no-padding no-margin">
+          <div class="panel-heading">
+            <h6 class="no-margin">Sort By</h6>
+          </div>
+          <div class="panel-body">
+            <select id="select-country" class="demo-default select-country no-padding no-margin" placeholder="Select" style="font-size:10px;">
+              <option value="1">Price (Low To High)</option>
+              <option value="2">Price (High To Low)</option>
+              <option value="3">Time (Low To High)</option>
+              <option value="4">Time (High To Low)</option>
+            </select>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div class="col-md-12 no-border-bottom">
+        <div class="panel-body table-responsive no-padding overflowflight">
+          <table class="table table-bordered">
+            <tr>
+              <td class="alert alert-black text-center" colspan="3"><strong><i class="fa fa-long-arrow-left"></i> Onward <i class="fa fa-long-arrow-right"></i></strong></td>
+              <td class="alert alert-black text-center" colspan="3"><strong><i class="fa fa-long-arrow-right"></i> Inward <i class="fa fa-long-arrow-left"></i></strong></td>
+              <td colspan="3" class="alert alert-lightblack text-center"></td>
+            </tr>
+            <tr>
+              <th class="alert alert-success">Flight</th>
+              <th class="alert alert-success">Departure</th>
+              <th class="alert alert-success">Arrival</th>
+              <th class="alert alert-info">Flight</th>
+              <th class="alert alert-info">Departure</th>
+              <th class="alert alert-info">Arrival</th>
+              <th class="alert alert-danger">Supplier</th>
+              <th class="alert alert-danger text-right">Cost</th>
+              <th class="alert alert-danger">&nbsp;</th>
+            </tr>
+            <tr>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="alert alert-warning">New Delhi<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="alert alert-warning">Mumbai<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="whbg"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="whbg">Mumbai<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="whbg">New Delhi<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="alert alert-warning">New Delhi<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="alert alert-warning">Mumbai<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="whbg"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="whbg">Mumbai<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="whbg">New Delhi<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning"><img src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="alert alert-warning">New Delhi<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="alert alert-warning">Mumbai<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="whbg"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="whbg">Mumbai<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="whbg">New Delhi<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning"><img src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="alert alert-warning">New Delhi<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="alert alert-warning">Mumbai<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="whbg"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="whbg">Mumbai<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="whbg">New Delhi<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning"><img src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="alert alert-warning">New Delhi<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="alert alert-warning">Mumbai<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="whbg"><img class="lazy" data-src="assets/images/goIcon.png"><br />
+                <span class="small">G5 314</span></td>
+              <td class="whbg">Mumbai<br />
+                14:20<br />
+                <span class="small graytxt">Non Stop</span></td>
+              <td class="whbg">New Delhi<br />
+                16:30<br />
+                <span class="small graytxt">1h 10m</span></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="clear"></div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="myModa1changehotels" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header no-border-btm" style="position:relative;">
+        <ul class="nav nav-tabs icon-tab">
+          <li class="active"><a data-toggle="tab" href="#home">TripsBank Results</a></li>
+          <li><a data-toggle="tab" href="#profile">Internal Results</a></li>
+          <li><a data-toggle="tab" href="#messages">API Results</a></li>
+        </ul>
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true" style="position:absolute; right:20px; top:15px;">&times;</button>
+        <div class="clear"></div>
+      </div>
+      <div class="col-md-12 no-border-bottom">
+        <div class="col-md-8" style="padding-left:0px;">
+          <div class="col-md-12 panel panel-default no-margin no-padding">
+            <div class="panel-heading">
+              <h6 class="no-margin"><i class="fa fa-filter"></i> Filter By</h6>
+            </div>
+            <div class="col-md-6" style="margin:2px 0px;">
+              <div class="form-group form-group1 no-margin">
+                <label>Star Rating</label>
+                <select id="select-state1" name="state[]" multiple class="demo-default select-state">
+                  <option value="">Any</option>
+                  <option value="1">5 Star</option>
+                  <option value="2">4 Star</option>
+                  <option value="3">3 Star</option>
+                  <option value="4">2 Star</option>
+                  <option value="5">1 Star</option>
+                  <option value="6">No Star</option>
+                </select>
+              </div>
+            </div>
+            <div class="col-md-6" style="margin:2px 0px;">
+              <div class="form-group form-group1 no-margin">
+                <label>User Rating</label>
+                <select id="select-state1" name="state[]" multiple class="demo-default select-state">
+                  <option value="">Any</option>
+                  <option value="1">Excellent</option>
+                  <option value="2">Good</option>
+                  <option value="3">Average</option>
+                  <option value="4">Poor</option>
+                </select>
+              </div>
+            </div>
+            <div class="clear"></div>
+          </div>
+        </div>
+        <div class="col-md-4 panel panel-default no-padding no-margin">
+          <div class="panel-heading">
+            <h6 class="no-margin">Sort By</h6>
+          </div>
+          <div class="panel-body">
+            <select id="select-country" class="demo-default select-country no-padding no-margin" placeholder="Select" style="font-size:10px;">
+              <option value="1">Price (Low To High)</option>
+              <option value="2">Price (High To Low)</option>
+              <option value="3">Rating (Low To High)</option>
+              <option value="4">Rating (High To Low)</option>
+            </select>
+          </div>
+        </div>
+        <div class="clear"></div>
+      </div>
+      <div class="col-md-12 no-border-bottom">
+        <div class="panel-body table-responsive no-padding overflowflight">
+          <table class="table table-bordered">
+            <tr>
+              <th class="alert alert-success">Hotel Name</th>
+              <th class="alert alert-success">Room Type</th>
+              <th class="alert alert-success">Star Rating</th>
+              <th class="alert alert-success">Supplier</th>
+              <th class="alert alert-danger text-right">Cost</th>
+              <th class="alert alert-danger">&nbsp;</th>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">Treebo Cartier</td>
+              <td class="alert alert-warning">Standard</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">The Elanza Hotel</td>
+              <td class="alert alert-warning">Deluxe</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">TB</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">juSTa Indiranagar</td>
+              <td class="alert alert-warning">Luxury</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">juSTa MG Road</td>
+              <td class="alert alert-warning">Standard</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">TB</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">Treebo Cartier</td>
+              <td class="alert alert-warning">Luxury</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">juSTa MG Road</td>
+              <td class="alert alert-warning">Deluxe</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">TB</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">Ramada Encore</td>
+              <td class="alert alert-warning">Standard</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"></td>
+              <td class="alert alert-warning">Internal</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+            <tr>
+              <td class="alert alert-warning">Shreyas Yoga Retreats</td>
+              <td class="alert alert-warning">Deluxe</td>
+              <td class="alert alert-warning"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Orange.png"><img class="lazy" data-src="assets/images/packStar_Gray.png"></td>
+              <td class="alert alert-warning">TB</td>
+              <td class="alert alert-warning text-right maroon"><strong><span class="fa fa-inr"></span> 78,899</strong></td>
+              <td class="alert alert-warning text-center"><a href="javascript:void(0);">
+                <button class="btn btn-primarySelect">Select</button>
+                </a></td>
+            </tr>
+          </table>
+        </div>
+      </div>
+      <div class="clear"></div>
+    </div>
+  </div>
+</div>
+<div class="modal fade" id="myModa1Modify" tabindex="-1" role="dialog" aria-labelledby="myModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header bg-primary">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title" id="myModalLabel"> Thank your</h4>
+      </div>
+      <div class="modal-body"> Lorem Ipsum is simply dummy text of the printing and typesetting industry.
+        Lorem Ipsum has been the industry's standard dummy text ever since
+        <div class="clear"></div>
+      </div>
+      <div class="modal-footer"> <a href="createItineraryFlexi.html" type="button" class="btn btn-info btn-round" >Finish</a> </div>
+    </div>
+  </div>
+</div>
+<script src="<?php echo $this->baseUrl('public/assets/js/tabulous.js'); ?>"></script>
+<!-- MiniColors Library Script Start -->
+<script src="<?php echo $this->baseUrl('public/assets/js/jquery.minicolors.min.js'); ?>"></script>
+<!-- MiniColors Library Script Start -->
+<!-- Date & Time Picker Library Script Start -->
+<script src="<?php echo $this->baseUrl('public/assets/js/jquery.datetimepicker.js'); ?>"></script>
+<!-- Date & Time Picker Library Script End -->
+<!--Demo for Date, Time Color Picker Script Start -->
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/pickerTool.js'); ?>"></script>
+<!--Demo for Date, Time Color Picker Script End -->
+<script src="<?php echo $this->baseUrl('public/assets/js/summernote.min.js'); ?>"></script>
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/editor.js'); ?>"></script>
+<!-- Script For Icheck -->
+<script src="<?php echo $this->baseUrl('public/assets/js/icheck.min.js'); ?>"></script>
+<!-- Script For Icheck -->
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/checkboxRadio.js'); ?>"></script>
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/uiElements.js'); ?>"></script>
+<!--Demo ui element Script End -->
+<script type="application/x-javascript">
+	$(".flightInfo") .hover(function(){
+		$(this).parent().children(".tooltipflight") .show();
+	});
+		
+	$(".flightInfo").mouseleave(function(){
+		$(".tooltipflight") .hide();
+	});	
+	
+	$(".btwob").click(function(){
+		$("#b2br").show();
+	});
+	
+	$(".tacid").click(function(){
+		$("#b2br1").show();
+		$("#b2br2").show();
+	});
+        function updatemarkup(){   
+            var ComssnType              =   $("#MarkType").val();
+            var sorate                  =   $(".costresult").text(); 
+            var dorate                  =   $(".costsores").text();
+            var torate                  =   $("#NewCostTO").text();
+            var extrabedrate            =   $(".costextrabedres").text(); 
+            var withoutbedrate          =   $(".costwithoutbedres").text();         
+            //alert(dorate);
+            var markup                  =   $("#markup").val();
+            if(ComssnType=='') {
+                alert('Please select Mark up type');
+                return false;
+            }
+            if(ComssnType=='FixedAmount') {
+                var singleoccupancy     =   $("#singleoccupancy").val(parseFloat(sorate)+parseFloat(markup)); 
+                var doubleoccupancy     =   $("#doubleoccupancy").val(parseFloat(dorate)+parseFloat(markup));
+                var tripleoccupancy     =   $("#tripleoccupancy").val(parseFloat(torate)+parseFloat(markup));
+                var extrabed            =   $("#extrabed").val(parseFloat(extrabedrate)+parseFloat(markup)); 
+                var withoutbed          =   $("#withoutbed").val(parseFloat(withoutbedrate)+parseFloat(markup));
+            }   else {
+                var singleoccupancy     =   $("#singleoccupancy").val((parseFloat(sorate)*parseFloat(markup)/100)+parseFloat(sorate)); 
+                var doubleoccupancy     =   $("#doubleoccupancy").val((parseFloat(dorate)*parseFloat(markup)/100)+parseFloat(dorate));
+                var tripleoccupancy     =   $("#tripleoccupancy").val((parseFloat(torate)*parseFloat(markup)/100)+parseFloat(torate));
+                var extrabed            =   $("#extrabed").val((parseFloat(extrabedrate)*parseFloat(markup)/100)+parseFloat(extrabedrate)); 
+                var withoutbed          =   $("#withoutbed").val((parseFloat(withoutbedrate)*parseFloat(markup)/100)+parseFloat(withoutbedrate));
+            }
+            var marketPlace         =   $("#marketPlace").val(); 
+            var permission          =   $("#permission").val(); 
+            
+            var singleoccupancy     =   $("#singleoccupancy").val(); 
+            var doubleoccupancy     =   $("#doubleoccupancy").val();
+            var tripleoccupancy     =   $("#tripleoccupancy").val();
+            var extrabed            =   $("#extrabed").val(); 
+            var withoutbed          =   $("#withoutbed").val();
+            var taxtype             =   $("#taxtype").val();
+            var taxres              =   $("#taxres").val();
+            
+            return false;               
+        }
+        function updateminpax(packid){
+            
+            var minpax            =   $("#minpax").val();
+            var multipackres      =   $("#multipackres").val();
+            var advancerule       =   $("#advancerule").val();
+            var balancerule      =   $("#balancerule").val();
+            var DiscountType        =   $("#DiscountType").val();
+            var DiscountVal         =   $("#DiscountVal").val();
+            $.ajax({
+             url  : '/package/update-customer-package-minpax',
+             data : { packid : packid, minpax : minpax, multipackres : multipackres, advancerule : advancerule, balancerule : balancerule, DiscountType : DiscountType, DiscountVal : DiscountVal },
+             dataType : 'html',
+             type : 'POST',
+             error : function() {
+             },
+             beforeSend : function() {
+             // $("#markup-table-loader").css("display","inline-block");
+             // $("#markup-settings-grid-content").html('');
+             },
+             success : function(response) { 
+                
+                 }
+             }); 
+        }
+        function deletemarketplacerate(tpsysID){
+            
+        var r = confirm("Are you sure you want to delete");
+        if(r == true){    
+            $.ajax({
+             url  : '/package/deletemktplace',
+             data : { tpsysID : tpsysID},
+             dataType : 'html',
+             type : 'POST',
+             error : function() {
+             },
+             beforeSend : function() {
+             // $("#markup-table-loader").css("display","inline-block");
+             // $("#markup-settings-grid-content").html('');
+             },
+             success : function(response) { 
+                
+                 }
+             }); 
+             window.location = '/package/add-customer-package-costsheet/id/'+tpsysID;
+         }    
+            
+        }
+        function updatepricerange(tpsysID){
+            var pricerange = $("#pricerange").val();
+             $.ajax({
+             url  : '/package/update-customer-package-price-range',
+             data : { tpsysID : tpsysID, pricerange : pricerange},
+             dataType : 'html',
+             type : 'POST',
+             error : function() {
+             },
+             beforeSend : function() {
+             // $("#markup-table-loader").css("display","inline-block");
+             // $("#markup-settings-grid-content").html('');
+             },
+             success : function(response) { 
+                
+                 }
+             }); 
+        }
+        function marketplacerate(frmdate,enddate){
+            var MarkType            =   $("#MarkType").val();
+            var marketPlace         =   $("#marketPlace").val(); 
+            var permission          =   $("#permission").val(); 
+            var markup              =   $("#markup").val(); 
+            var singleoccupancy     =   $("#singleoccupancy").val(); 
+            var doubleoccupancy     =   $("#doubleoccupancy").val();
+            var extrabed            =   $("#extrabed").val(); 
+            var withoutbed          =   $("#withoutbed").val();
+            var tax                 =   $("#tax").val();
+            var taxres              =   $("#taxres").val();
+            var packageId           =   $("#packageId").val();
+            if(tax!='Included') { 
+                if(taxres=='') {
+                  alert("Please enter tax");
+                  $("#taxres").focus();
+                  return false;
+                }
+            }   
+            if(permission=='1') {
+            var perm = 'Allow';
+            } else {
+             var perm = 'Not-Allowed';
+            }
+            var htmlres             =   '<tr><td>'+perm+'</td><td>'+markup+'</td><td class="text-center">'+doubleoccupancy+'</td><td class="text-center">'+singleoccupancy+'</td><td class="text-center">'+extrabed+'</td>  <td class="text-center">'+withoutbed+'</td><td class="text-center">'+tax+' '+taxres+'</td><td><a href="javascript:void(0);" class="btn ls-red-btn btn-sm tooltipLink"  data-placement="top" data-toggle="tooltip" data-original-title="Delete"><i class="fa fa-trash-o"></i></a></td></tr>';
+            $("#costmarkupres").append(htmlres);
+            $.ajax({
+             url  : '/package/customer-package-marketwise-rate',
+             data : { fromdate : frmdate, todate : enddate, ratecurrency : '1', currency : '1', packageId : packageId, MarkType : MarkType, marketPlace : marketPlace, permission : permission,markup : markup, singleoccupancy : singleoccupancy, doubleoccupancy : doubleoccupancy, extrabed : extrabed,withoutbed : withoutbed, tax : tax, taxres : taxres },
+             dataType : 'html',
+             type : 'POST',
+             error : function() {
+
+             },
+             beforeSend : function() {
+             // $("#markup-table-loader").css("display","inline-block");
+             // $("#markup-settings-grid-content").html('');
+             },
+             success : function(response) { 
+                // alert('Updated successfully');
+                 //$("#resultdayiten").append(response);
+                 //$("#markup-settings-grid-content").html(response);
+                 //$("#markup-table-loader").css("display","none");
+                 }
+             });
+    
+        }
+        function updateopinclmarkup(packageId,actId,day,cost){
+    
+            var markup     =	$("#markup_"+packageId+"_"+actId+"_"+day).val();            
+            // alert(markup);
+             // alert(cost);
+            var inccost = (cost*markup)/100;
+            var newcost = parseFloat(inccost)+parseFloat(cost);
+            $("#markres_"+packageId+"_"+actId+"_"+day).html(newcost); 
+             //alert(detail);markres_
+             $.ajax({
+             url  : '/package/update-customer-optional-incl-markup',
+             data : { packageId : packageId, actId : actId, day : day, markup : markup },
+             dataType : 'html',
+             type : 'POST',
+             error : function() {
+
+             },
+             beforeSend : function() {
+             // $("#markup-table-loader").css("display","inline-block");
+             // $("#markup-settings-grid-content").html('');
+             },
+             success : function(response) { 
+                // alert('Updated successfully');
+                 //$("#resultdayiten").append(response);
+                 //$("#markup-settings-grid-content").html(response);
+                 //$("#markup-table-loader").css("display","none");
+                 }
+             });
+         }
+        function cancelpolicy(){
+            var cancel              =   $("#cancel").val(); 
+            var cancelpercnt        =   $("#cancelpercnt").val(); 
+            var cancelres           =   $("#cancelres").val();            
+            var packageId           =   $("#packageId").val();
+        var htmlres  = '<tr><td>Before '+cancel+' Days</td><td>'+cancelpercnt+'%</td><td><a href="#" class="btn ls-red-btn btn-sm tooltipLink"  data-placement="top" data-toggle="tooltip" data-original-title="Delete"><i class="fa fa-trash-o"></i></a></td></tr>';    
+        $("#cancellationres").append(htmlres);
+        $.ajax({
+             url  : '/package/customer-package-cancel-policy',
+             data : { packageId : packageId, cancel : cancel, cancelpercnt : cancelpercnt, cancelres : cancelres },
+             dataType : 'html',
+             type : 'POST',
+             error : function() {
+
+             },
+             beforeSend : function() {
+             // $("#markup-table-loader").css("display","inline-block");
+             // $("#markup-settings-grid-content").html('');
+             },
+             success : function(response) { 
+                // alert('Updated successfully');
+                 //$("#resultdayiten").append(response);
+                 //$("#markup-settings-grid-content").html(response);
+                 //$("#markup-table-loader").css("display","none");
+                 }
+             });
+    
+        }
+        
+        var totfixeddup = '0';
+        $(".fixedcost").each(function() {
+        totfixeddup = parseFloat(totfixeddup)+parseFloat($(this).val());
+        });
+        
+        var totalcarvalues = [];
+        $(".fixedcostcar").each(function() {
+           totfixed11 = parseFloat($(this).val());
+           totalcarvalues.push(totfixed11);
+        });
+       
+       var cartransport = 0;
+       for (i = 0; i < totalcarvalues.length; i++) { 
+         cartransport = parseInt(totalcarvalues[i])+cartransport;
+       }
+       
+       var totfixed = parseInt(totfixeddup) - parseInt(cartransport);
+       
+        
+      //   alert(totalcarvalues[1]);
+        var totcost = '0';
+        $(".calccost").each(function() {
+        totcost = parseFloat(totcost)+parseFloat($(this).val());
+        });
+        //alert(totcost);
+        $(".costresult").html(totcost);
+        var totaltraveler = $("#totaltraveller").val();
+        var maincarcost = parseInt(cartransport)*totaltraveler;
+        
+        $(".costresult1").html(parseFloat(totcost)+parseFloat(totfixed)+parseInt(maincarcost));
+        
+        var totsocost = '0';
+        $(".calcsocost").each(function() {
+        totsocost = parseFloat(totsocost)+parseFloat($(this).val());
+        });
+        //alert(totcost);
+        $(".costsores").html(totsocost);
+        $(".costsores1").html(parseFloat(totsocost)+parseFloat(totfixed)+parseInt(maincarcost));
+        
+        var totebcost = '0';
+        $(".calcebcost").each(function() {
+        totebcost = parseFloat(totebcost)+parseFloat($(this).val());
+        });
+        //alert(totcost);
+        $(".costextrabedres").html(totebcost);
+        $(".costextrabedres1").html(parseFloat(totebcost)+parseFloat(totfixed)+parseInt(maincarcost));
+        
+        var totwthbcost = '0';
+        $(".calcwthbcost").each(function() {
+        totwthbcost = parseFloat(totwthbcost)+parseFloat($(this).val());
+        });
+        
+        //alert(totcost);
+        $(".costwithoutbedres").html(totwthbcost);
+        $(".costwithoutbedres1").html(parseFloat(totwthbcost)+parseFloat(totfixed)+parseInt(maincarcost));
+        
+        function updatepackagecost(){
+         var cost = $(".costresult").html(); 
+         var packageId           =   $("#packageId").val();
+         //alert(cost);
+         $.ajax({
+             url  : '/package/update-package-cost',
+             data : { packageId : packageId, cost : cost },
+             dataType : 'html',
+             type : 'POST',
+             error : function() {
+
+             },
+             beforeSend : function() {
+             // $("#markup-table-loader").css("display","inline-block");
+             // $("#markup-settings-grid-content").html('');
+             },
+             success : function(response) { 
+                // alert('Updated successfully');
+                 //$("#resultdayiten").append(response);
+                 //$("#markup-settings-grid-content").html(response);
+                 //$("#markup-table-loader").css("display","none");
+                 }
+             });
+        }
+        updatepackagecost();
+        
+        function updatepackagecostsheet(){
+            
+          var customercostsheet = $('#customercostsheet').serialize();
+          var tpsysID = '<?php echo base64_encode($flexiPackageList['TPSysId']);?>';
+          $.ajax({
+          url: '/customer/savepackagecostsheet',
+           // data: {search_going_to:search_going_to,search_price_range:search_price_range,search_inclusions:search_inclusions,search_theme:search_theme,number_of_traveler:number_of_traveler,customerID:customerID,search_specific_date:search_specific_date,TPSysId:TPSysId,itenaryID:itenaryID,roominfojson:roominfojson},
+            data: customercostsheet,
+            method: 'POST',
+            dataType: 'html',
+            error: function (err) {
+                //  alert(err);
+            },
+            beforeSend: function () {
+                $('#loaderimg').css('display', 'inline-block');
+            },
+            success: function (response) {
+               window.location = '/package/view-byo-pkg/id/'+tpsysID;
+            }
+            });
+        }
+	</script>
+</body>
+</html>

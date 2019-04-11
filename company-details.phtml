@@ -1,0 +1,1448 @@
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/validationEngine.jquery.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/bootstrapValidator.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/fileinput.min.css'); ?>">
+<?php
+$agencynBankDetails = $this->agencynBankDetails;
+$registeredAddress = $this->registeredAddress;
+$corporateAddress = $this->corporateAddress;
+$verifyData = $this->verifyData;
+$compFile1 = $this->compFile1;
+$compFile2 = $this->compFile2;
+
+if (@$agencynBankDetails != array()) {
+    $cdAction = 'update-company-details';
+} else {
+    $cdAction = 'save-company-details';
+}
+//echo '<pre>';
+//print_r($this->AgencyPrimaryUserSignature);
+//print_r($agencynBankDetails);
+//print_r($registeredAddress);
+//print_r($corporateAddress);
+//die;
+?>
+<?php echo $this->render('common-modals/imageupload.phtml'); ?>
+<div id="dispMessage"><?php if (count($this->messages)) { ?>
+        <?php echo ($this->messages[0]); ?>
+    <?php } ?> </div>
+<h2 class="col-md-12">Complete Your Profile</h2>
+
+<h6 class="col-md-12">Please fill your company details to complete the registration process and get your holiday packages live on <?php echo SITE_NAME; ?>.</h6>
+<form id="AgencyCompanyDetailsForm" method="POST" autocomplete="off" enctype="multipart/form-data" action="/register/<?php echo $cdAction; ?>">
+
+    <div class="col-md-12 no-padding">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Company Name<span class="red">*</span></label>
+                <div class="col-md-12 no-padding"><input type="text" name="companyName" class="form-control compDetailRead" maxlength="80"  value="<?php echo trim(@$verifyData['Title']); ?>"></div>
+            </div>
+        </div>
+
+
+        <div class="col-md-6" <?php //if (@$agencynBankDetails != array()) { echo 'style="pointer-events:none;"'; } ?>>
+            <div class="form-group no-margin selDropMess">
+                <?php $companyTypeArray = unserialize(AGENCY_COMPANY_TYPE); //print_r($companyTypeArray); ?>
+                <label>Company Type<span class="red">*</span></label>
+                <select id="companyType" name="companyType" class="demo-default select-country compDetailDis" placeholder="Select" <?php if (@$agencynBankDetails != array()) { echo 'disabled'; } ?>>
+                        <option value="">Select Company Type</option>
+                        <?php foreach ($companyTypeArray as $key => $companyTypeValue) { ?>
+                            <option value="<?php echo $key; ?>" <?php echo ($key == @$verifyData['FirmType']) ? 'selected' : '' ?>><?php echo $companyTypeValue; ?></option>
+                        <?php } ?>
+                    </select>                     
+                </div>
+        </div>
+        
+
+    </div>
+
+
+    <div class="col-md-12 no-padding">
+        <div class="col-md-6">
+            <div class="form-group">
+              <label>GSTIN Number<span class="red"></span></label>
+                <div class="col-md-12 no-padding"><input type="text" name="companyServiceTaxNo" id="companyServiceTaxNo" class="form-control compDetailRead" maxlength="15" placeholder="GSTIN Number Ex. 06SBSPL6845G1Z5" value="<?php echo trim(@$verifyData['ServiceTaxNo']); ?>"> </div>
+
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <?php $natureOfBusinessArray = unserialize(AGENCY_NATURE_OF_BUSINESS); ?>
+                <label>Nature Of Business<span class="red">*</span></label>
+                <div class="col-md-12 no-padding nbusiness checkboxName">
+                    <?php
+                    $i = 0;
+                    foreach ($natureOfBusinessArray as $key => $natureOfBusiness) {
+                        ?>
+                        <label class="checkbox inlinebl">
+                            <input class="icheck-red natureOfBusiness" type="checkbox" name="natureOfBusiness[]" id="natureOfBusiness<?= $i; ?>" value="<?= $key; ?>" <?php
+                            if (in_array($key, array_keys($this->valNatureOfBusinessMask))) {
+                                echo 'checked';
+                            }
+                            ?>>&nbsp;&nbsp;<?php echo $natureOfBusiness; ?> 
+                        </label>&nbsp;
+                        <?php
+                        $i++;
+                    }
+                    ?> 
+                    <!--                    <label class="checkbox inlinebl">
+                                            <input class="icheck-red" type="checkbox" name="natureOfBusinessOthers" id="natureOfBusinessO" value="Others">&nbsp;&nbsp;Others
+                                        </label>-->
+                </div>
+                <div class="col-md-12 no-padding specify" style="display:none;"><input type="text" class="form-control compDetailRead" name="otherNoB" placeholder="Please Specify"></div>
+                <div class="clear"></div></div>
+        </div>
+    </div>
+
+
+
+    <div class="col-md-12 no-padding">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Company Display Name<span style="font-size:11px;"> (Specify brand/short name)</span></label>
+                <div class="col-md-12 no-padding">
+                    <input type="text" name="compDisplayName" id="compDisplayName" class="form-control" placeholder="Company Display Name" maxlength="80" value="<?php echo @$verifyData['DisplayName']; ?>">
+                <span style="font-size:11px;">Leave it blank if you want to use company's name.</span>
+                </div>
+                
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Company Logo</label>
+
+                <div class="col-md-12 no-padding testUPloadClass comlogo">
+                    <?php if (trim(@$verifyData['Logo']) == '') { ?>
+                        <input type="file" name="companyLogo" id="companyLogo" class="file" showPreview=false>     
+                        <span class="small">Only allows file types of GIF, PNG, JPG and JPEG & recommended image size is 150*300px</span>
+<?php } else { ?>
+                        
+                        &nbsp;&nbsp;
+                        <a target="_blank" href="<?php echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim(@$verifyData['Logo'])); ?>" > Click Here To View</a>
+                        <a class="submit btn" onclick="uploadLogo('<?php echo $verifyData['AgencySysId'] ?>');">Upload Logo</a>
+                        <!--<img src="<?php // echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim(@$verifyData['Logo']));   ?>" width="50" height="30"/>-->
+<?php } ?>
+                </div>
+               
+
+                <div class="clear"></div></div></div>
+    </div>
+
+
+
+
+    <div class="col-md-12 no-padding">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Website URL</label>
+                <div class="col-md-12 no-padding"><input type="text" name="websiteUrl" id="websiteUrl" placeholder="ex: www.globaltravelexchange.com" class="form-control compDetailRead" maxlength="100" value="<?php echo trim(@$verifyData['Url']); ?>"> </div>
+
+            </div>
+        </div>
+        <div class="col-md-6">
+            <?php //echo '<pre>';print_r($this->currencyListArr); print_r($this->verifyData);?>
+        <div class="form-group no-margin selDropMess">
+            <label>Transaction Currency <span style="font-size:11px;">(Base Currency)</span><span class="red">*</span></label>
+             <select id="trxcurrency" name="trxcurrency" class="demo-default select-country" placeholder="Select" <?php if (@$agencynBankDetails != array()) { echo 'disabled'; } ?>>
+                <option value="">Select</option>
+                <?php $currencyarr = $this->currencyListArr;
+                foreach($currencyarr as $Symbol => $currencyId ){ // print_r($currency); ?>
+                    <option value="<?php echo $currencyId ?>" <?php if ($currencyId == $this->verifyData['TrxCurrency']) {
+                    echo 'selected';
+                } else {
+
+                } ?>><?php echo $Symbol ?></option>     
+        <?php } ?>
+            </select>
+        </div>
+        </div>
+    </div>
+
+
+
+    <div class="col-md-12 no-padding firmTypeCl" id="firmTypeCl1">
+        <div class="col-md-6">
+            <div class="form-group form-group1 ">
+                <label>Corporate Identification Number (CIN)</label>
+                <div class="col-md-12 no-padding"><input type="text" name="pvtltd_CinNO" id="pvtltd_CinNO" class="form-control compDetailRead" maxlength="21" placeholder="ex: U00000MH2011PTC090633" value="<?php echo trim(@$verifyData['CIN']); ?>"></div>
+                <div class="clear"></div></div>
+
+            <div class="form-group form-group1">
+                <label>Upload Certificate Of Incorporation copy</label>
+                <div class="col-md-12 no-padding testUPloadClass comlogo">
+                    <?php if (trim(@$compFile1['FilesPath']) == '') { ?>
+                        <input  type="file" name="pvtltd_CinNOFile" id="pvtltd_CinNOFile" class="file"> 
+                        <span class="small">Only allows file types of GIF, PNG, JPG, JPEG and PDF.</span>
+                    <?php } else { ?>
+                        &nbsp;&nbsp;<a target="_blank" href="<?php echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim(@$compFile1['FilesPath'])); ?>" > Click Here To View</a>
+                        <!--<img src="<?php // echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($compFile1['FilesPath']));   ?>" width="50" height="30"/>-->
+<?php } ?>
+
+                    <div class="clear"></div></div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group form-group1">
+                <label>Company PAN Card Number</label>
+                <div class="col-md-12 no-padding"><input type="text" name="pvtltd_compPanNo" id="pvtltd_compPanNo" class="form-control compDetailRead" maxlength="10" placeholder="PAN Card Number Ex. AAAAA1111A" value="<?php echo trim(@$verifyData['PanCardNo']); ?>">    </div>                   
+                <div class="clear"></div></div>
+
+            <div class="form-group form-group1">
+                <label>Upload PAN Card Copy</label>
+                <div class="col-md-12 no-padding testUPloadClass comlogo">
+                    <?php if (trim(@$compFile2['FilesPath']) == '') { ?>
+                        <input type="file" name="pvtltd_compPanNoFile" id="pvtltd_compPanNoFile"  class="file" showPreview=false>  
+                        <span class="small">Only allows file types of GIF, PNG, JPG, JPEG and PDF.</span>
+                    <?php } else { ?>
+                        &nbsp;&nbsp;<a target="_blank" href="<?php echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($compFile2['FilesPath'])); ?>" > Click Here To View</a>
+    <!--<img src="<?php // echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($compFile2['FilesPath']));   ?>" width="50" height="30"/>-->
+<?php } ?>
+
+                </div>
+
+                <div class="clear"></div>
+            </div>
+        </div>
+
+    </div>
+
+
+
+    <div class="col-md-12 no-padding firmTypeCl" id="firmTypeCl2" style="display:none;">
+        <div class="col-md-6">
+            <div class="form-group form-group1">
+                <label>Copy of Shop & Establishment Certificate<span class="red">*</span></label>
+                <div class="col-md-12 no-padding testUPloadClass comlogo">
+                    <?php if (trim(@$compFile1['FilesPath']) == '') { ?>
+                        <input id="sole_copyShopCertFile" name="sole_copyShopCertFile" type="file" class="file">
+                        <span class="small">Only allows file types of GIF, PNG, JPG, JPEG and PDF.</span>
+<?php } else { ?>
+                        &nbsp;&nbsp;<a target="_blank" href="<?php echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($compFile1['FilesPath'])); ?>" > Click Here To View</a>
+
+                             <!--&nbsp;&nbsp;<img src="<?php // echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($compFile1['FilesPath']));   ?>" width="50" height="30"/>-->
+<?php } ?>
+                </div>
+                <div class="clear"></div>        
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group form-group1">
+                <label>Owner/Director's PAN Number<span class="red"></span></label>
+                <div class="col-md-12 no-padding"><input type="text" name="sole_ownerPanNo" id="sole_ownerPanNo" class="form-control compDetailRead" maxlength="10" placeholder="PAN Card Number Ex. AAAAA1111A" value="<?php echo trim(@$verifyData['PanCardNo']); ?>"> </div>
+                <div class="clear"></div>
+            </div>
+
+            <div class="form-group form-group1">
+                <label>Upload PAN Card Copy<span class="red">*</span></label>
+                <div class="col-md-12 no-padding testUPloadClass comlogo">
+                    <?php if (trim(@$compFile2['FilesPath']) == '') { ?>
+                        <input id="sole_ownerPanNoFile" name="sole_ownerPanNoFile" type="file" class="file" showPreview=false>  
+                        <span class="small">Only allows file types of GIF, PNG, JPG, JPEG and PDF.</span>
+<?php } else { ?>
+                        &nbsp;&nbsp;<a target="_blank" href="<?php echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($compFile2['FilesPath'])); ?>" > Click Here To View</a>
+
+                             <!--&nbsp;&nbsp;<img src="<?php // echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($compFile2['FilesPath']));   ?>" width="50" height="30"/>-->
+<?php } ?>
+
+                </div> <div class="clear"></div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <div class="col-md-12 no-padding firmTypeCl" id="firmTypeCl3" style="display:none;">
+        <div class="col-md-6">
+            <div class="form-group form-group1">
+                <label>Copy of Partnership Deed<span class="red">*</span></label>
+                <div class="col-md-12 no-padding testUPloadClass comlogo">
+                    <?php if (trim(@$compFile1['FilesPath']) == '') { ?>
+                        <input id="firm_copyPartnershipDeed" name="firm_copyPartnershipDeed" type="file"  class="file">
+                        <span class="small">Only allows file types of GIF, PNG, JPG, JPEG and PDF.</span>
+                    <?php } else { ?>
+                        &nbsp;&nbsp;<a target="_blank" href="<?php echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($compFile1['FilesPath'])); ?>" > Click Here To View</a>
+                         <!--&nbsp;&nbsp;<img src="<?php // echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($compFile1['FilesPath']));   ?>" width="50" height="30"/>-->
+<?php } ?>
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group form-group1">
+                <label>Company PAN Card Number<span class="red">*</span></label>
+                <div class="col-md-12 no-padding"><input type="text" name="firm_compPanNo" id="firm_compPanNo" class="form-control compDetailRead" maxlength="10" placeholder="PAN Card Number Ex. AAAAA1111A" value="<?php echo trim(@$verifyData['PanCardNo']); ?>"></div>
+                <div class="clear"></div>
+            </div>
+
+            <div class="form-group form-group1">
+                <label>Upload PAN Card Copy<span class="red">*</span></label>
+                <div class="col-md-12 no-padding testUPloadClass comlogo">
+                    <?php if (trim(@$compFile2['FilesPath']) == '') { ?>
+                        <input type="file" name="firm_compPanNoFile" id="firm_compPanNoFile"  class="file   " showPreview=false> 
+                        <span class="small">Only allows file types of GIF, PNG, JPG, JPEG and PDF.</span>
+                    <?php } else { ?>
+                        &nbsp;&nbsp;<a target="_blank" href="<?php echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($compFile2['FilesPath'])); ?>" > Click Here To View</a>
+                        <!--&nbsp;&nbsp;<img src="<?php // echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($compFile2['FilesPath']));   ?>" width="50" height="30"/>-->
+<?php } ?>
+
+                </div>
+                <div class="clear"></div>
+            </div>
+        </div>
+
+    </div>
+
+
+    <h2 class="col-md-12">Registered Address</h2>
+<?php $regAddress = explode('___', trim($registeredAddress['Address'])); ?>
+    <div class="col-md-12 no-padding">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Address Line 1<span class="red">*</span></label>
+                <div class="col-md-12 no-padding"><input type="text" name="address" id="address" class="form-control compDetailRead" maxlength="180" value="<?php echo @$regAddress[0]; ?>"></div>
+                <div class="clear"></div>                     
+            </div>
+        </div>
+
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Address Line 2</label>
+                <div class="col-md-12 no-padding"><input type="text" name="address2" id="address2" class="form-control compDetailRead" maxlength="180" value="<?php echo @$regAddress[1]; ?>"></div>
+                <div class="clear"></div>                
+            </div>
+        </div>
+    </div>
+
+<?php //print_r($this->countryListArray);   ?>
+    <div class="col-md-12 no-padding">
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Country<span class="red">*</span></label>
+                <div class="col-md-12 no-padding"><input name="selectCountry" id="selectCountry" type="text" onkeyup="getCountryList();
+                        $('#hidden_selected_country_id_registered').val('');" placeholder="Country Name" class="form-control compDetailRead" value="<?php echo trim(@$registeredAddress['CountryName']) ?>" maxlength="25"></div>
+                <div class="clear"></div>
+
+                <input name="registered_country_id" id="hidden_selected_country_id_registered" type="hidden" value="<?php echo trim(@$registeredAddress['CountrySysId']) ?>">
+
+            </div>
+        </div>
+
+
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>City<span class="red">*</span></label>
+                <div class="col-md-12 no-padding"><input name="selectCity" id="selectCity" type="text" placeholder="City Name" value="<?php echo trim(@$registeredAddress['CityName']) ?>" onkeyup="getCityList();" class="form-control    compDetailRead" maxlength="25"></div>
+                <div class="clear"></div>
+                <input name="registered_city_id" id="hidden_selected_city_id_registered" type="hidden" value="<?php echo trim(@$registeredAddress['CitySysId']) ?>">
+
+
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-12 no-padding">
+
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>PIN Code<span class="red">*</span></label>
+                <div class="col-md-12 no-padding"> <input type="text" name="pinCode" id="pinCode" class="form-control compDetailRead" maxlength="6" value="<?php echo trim(@$registeredAddress['Pincode']) ?>">   </div>                  
+                <div class="clear"></div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="form-group">
+<?php if ($registeredAddress['CopyOfAddressProofFile'] != '') { ?>
+                    <label>Upload Address Proof copy</label>
+                    <div class="col-md-12 no-padding testUPloadClass comlogo">
+                        &nbsp;&nbsp;<a target="_blank" href="<?php echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($registeredAddress['CopyOfAddressProofFile'])); ?>" > Click Here To View</a>
+                    </div>
+                    <!--&nbsp;&nbsp;<img src="<?php // echo $this->baseUrl('public/upload/media/agency/' . @trim($verifyData['AgencySysId']) . '/' . trim($registeredAddress['CopyOfAddressProofFile']));   ?>" width="50" height="30"/>-->
+<?php } else { ?>
+                    <label>Upload Address Proof copy</label>
+                    <div class="col-md-12 no-padding testUPloadClass comlogo">
+                        <input id="copyAddressProofFile" name="copyAddressProofFile" type="file" class="file" showPreview=false>  
+                        <span class="small">Only allows file types of GIF, PNG, JPG, JPEG and PDF.</span>
+                    </div><?php } ?>
+
+
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <div class="col-md-12">
+        <div class="form-group form-group1">
+            <label>Is Corporate address same as registered address?<span class="red">*</span></label>            
+            <label class="radio inlinebl">
+                <input class="icheck-black" type="radio" name="isSameAsRegisteredAddress" id="isSameAsRegisteredAddress1" value="Yes" <?php echo (sizeof(@$corporateAddress) == 0) ? 'checked' : '' ?>> Yes 
+            </label>&nbsp;
+            <label class="radio inlinebl">
+                <input class="icheck-black" type="radio" name="isSameAsRegisteredAddress" id="isSameAsRegisteredAddress" value="No" <?php echo (sizeof(@$corporateAddress) > 0) ? 'checked' : '' ?>> No  
+
+            </label>
+            <div class="clear"></div></div>
+    </div>
+
+    <div class="col-md-12 no-padding corpadd" style="display:<?php echo (sizeof(@$corporateAddress) > 0) ? 'block' : 'none' ?>;;">
+
+        <h5 class="col-md-12">Corporate Address</h5>
+
+<?php $corpAddress = explode('___', trim($corporateAddress['Address'])); ?>
+        <div class="col-md-12 no-padding">
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Address Line 1<span class="red">*</span></label>
+                    <div class="col-md-12 no-padding">  <input type="text" name="corpAddress" id="corpAddress" class="form-control compDetailRead" maxlength="100" value="<?php echo trim(@$corpAddress[0]); ?>"> </div>
+                    <div class="clear"></div>                    
+                </div>
+            </div>
+
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>Address Line 2</label>
+                    <div class="col-md-12 no-padding"> <input type="text" name="corpAddress2" id="corpAddress2" class="form-control compDetailRead" maxlength="100" value="<?php echo trim(@$corpAddress[1]); ?>"> </div>
+                    <div class="clear"></div>               
+                </div>
+            </div>
+        </div>
+
+
+
+        <div class="col-md-12 no-padding">
+            <div class="col-md-6">
+                <div class="form-group selDropMess">
+                    <label>Country<span class="red">*</span></label>
+                    <div class="col-md-12 no-padding"> <input name="selectCountry2" id="selectCountry2" type="text" onkeyup="getCorporateCountryList();
+                            $('#hidden_selected_country_id_corporate').val('');" placeholder="Country Name" class="form-control compDetailRead" value="<?php echo $corporateAddress['CountryName']; ?>" maxlength="25"></div>
+                    <div class="clear"></div>
+                    <input name="corporate_country_id" id="hidden_selected_country_id_corporate" type="hidden" value="<?php echo $corporateAddress['CountrySysId']; ?>">
+
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>City<span class="red">*</span></label>
+                    <div class="col-md-12 no-padding"> <input name="selectCity2" id="selectCity2" type="text" placeholder="City Name" value="<?php echo $corporateAddress['CityName']; ?>" onkeyup="getCorporateCityList();" class="form-control    compDetailRead" maxlength="25"></div>
+                    <div class="clear"></div>
+                    <input name="corporate_city_id" id="hidden_selected_city_id_corporate" type="hidden" value="<?php echo $corporateAddress['CitySysId']; ?>">
+
+
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-12 no-padding">            
+
+            <div class="col-md-6">
+                <div class="form-group">
+                    <label>PIN Code<span class="red">*</span></label>
+                    <div class="col-md-12 no-padding">  <input type="text" name="pinCode2" id="pinCode2" class="form-control compDetailRead" maxlength="6" value="<?php echo trim(@$corporateAddress['Pincode']); ?>">                     </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+
+            <div class="col-md-6">
+                <div class="form-group">
+<?php if ($corporateAddress['CopyOfAddressProofFile'] != '') { ?>
+                        <label>Upload Address Proof copy</label>
+                        <div class="col-md-12 no-padding testUPloadClass comlogo">
+                            &nbsp;&nbsp;<a target="_blank" href="<?php echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim($corporateAddress['CopyOfAddressProofFile'])); ?>" > Click Here To View</a>
+                        </div>
+                        <!--&nbsp;&nbsp;<img src="<?php // echo $this->baseUrl('public/upload/media/agency/' . @trim($verifyData['AgencySysId']) . '/' . trim($corporateAddress['CopyOfAddressProofFile']));   ?>" width="50" height="30"/>-->
+<?php } else { ?>
+                        <label>Upload Address Proof copy<span class="red">*</span></label>
+                        <div class="col-md-12 no-padding testUPloadClass comlogo">
+                            <input id="copyAddressProofFile2" name="copyAddressProofFile2" type="file" class="file" showPreview=false> 
+                            <span class="small">Only allows file types of GIF, PNG, JPG, JPEG and PDF.</span>
+                        </div><?php } ?>
+                </div>
+
+                <div class="clear"></div>
+            </div>
+        </div>
+    </div>
+
+
+
+</div>
+
+
+<h2 class="col-md-12">Bank Details</h2>
+<div class="col-md-12 no-padding">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Account Holder Name</label>
+            <div class="col-md-12 no-padding"><input type="text" name="accountHolderName" id="accountHolderName" class="form-control compDetailRead" maxlength="40" value="<?php echo trim(@$agencynBankDetails['AccountName']); ?>"></div>
+            <div class="clear"></div>
+        </div>
+    </div>
+
+
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Account Number</label>
+            <div class="col-md-12 no-padding"><input type="text" name="accountNumber" id="accountNumber" class="form-control compDetailRead" maxlength="25" value="<?php echo trim(@$agencynBankDetails['AccountNo']); ?>"></div>
+            <div class="clear"></div>             
+        </div>
+    </div>
+</div>
+
+
+
+<div class="col-md-12 no-padding">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>IFSC Code</label>
+            <!--<div class="input-group">-->
+            <div class="col-md-12 no-padding"><input type="text" name="ifscCode" id="ifscCode" class="form-control compDetailRead" maxlength="15" value="<?php echo trim(@$agencynBankDetails['IFSCCode']); ?>"></div>
+            <div class="clear"></div>
+<!--                    <span class="input-group-btn">
+                <button class="btn btn-default" type="button">Get Bank Details</button>
+            </span>-->
+            <!--</div>-->                     
+        </div>
+    </div>
+
+
+    <div class="col-md-6">
+        <div class="form-group selDropMess">
+            <label>Account Type</label>
+                <select id="accountType" name="accountType" class="demo-default select-country" placeholder="Select" <?php if (@$agencynBankDetails != array()) { echo 'disabled'; } ?>>
+                    <option value="">Select Account Type</option>
+                    <?php
+                    $AccTypeArr = unserialize(BANK_ACCOUNT_TYPE); //print_r($AccTypeArr); die;
+                    foreach ($AccTypeArr as $AccType) {
+                        ?>
+                        <option value="<?php echo strtolower($AccType); ?>" <?php echo (strtolower($AccType) == trim(@$agencynBankDetails['AccountType'])) ? 'selected' : ''; ?>><?php echo $AccType; ?></option>
+<?php } ?>
+
+                </select>
+        </div>
+    </div>
+</div>
+
+
+<div class="col-md-12 no-padding">
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Bank</label>
+            <div class="col-md-12 no-padding"><input type="text" name="BankName" id="BankName" class="form-control compDetailRead" value="<?php echo trim(@$agencynBankDetails['BankName']); ?>"></div>
+            <div class="clear"></div>
+        </div>
+    </div>
+
+
+    <div class="col-md-6">
+        <div class="form-group">
+            <label>Branch</label>
+            <div class="col-md-12 no-padding"><input type="text" name="branchName" id="branchName" class="form-control compDetailRead" maxlength="50" value="<?php echo trim(@$agencynBankDetails['Branch']); ?>"></div>
+            <div class="clear"></div>
+        </div>
+    </div>
+</div>
+
+<div class="col-md-12 no-padding">
+    <div class="col-md-6">
+        <div class="form-group selDropMess">
+            <label>Country</label>
+            <div class="col-md-12 no-padding"><input name="selectCountry3" id="selectCountry3" type="text" onkeyup="getBankCountryList();
+                    $('#hidden_selected_country_id_bank').val('');" placeholder="Country Name" class="form-control compDetailRead" value="<?php echo trim(@$agencynBankDetails['CountryName']); ?>" maxlength="25"></div>
+            <div class="clear"></div>
+            <input name="bank_country_id" id="hidden_selected_country_id_bank" type="hidden" value="<?php echo trim(@$agencynBankDetails['BankCountrySysId']); ?>">
+
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="form-group selDropMess">
+            <label>City</label>
+            <div class="col-md-12 no-padding"> <input name="selectCity3" id="selectCity3" type="text" placeholder="City Name"  onkeyup="getBankCityList();" class="form-control compDetailRead" maxlength="25" value="<?php echo trim(@$agencynBankDetails['CityName']); ?>"></div>
+            <div class="clear"></div>
+            <input name="bank_city_id" id="hidden_selected_city_id_bank" type="hidden" value="<?php echo trim(@$agencynBankDetails['BankCitySysId']); ?>">
+        </div>
+    </div>
+
+</div>
+
+<div class="col-md-12 no-padding">
+    <div class="col-md-6">
+        <div class="form-group">
+
+<?php if (@$agencynBankDetails['CancelledChequeFile'] != '') { ?>
+                <label> Cancelled Cheque copy</label>
+                <div class="col-md-12 no-padding testUPloadClass comlogo">
+                    &nbsp;&nbsp;<a target="_blank" href="<?php echo $this->baseUrl('public/upload/media/agency/' . @trim(@$verifyData['AgencySysId']) . '/' . trim(@$agencynBankDetails['CancelledChequeFile'])); ?>" > Click Here To View</a>
+                </div>
+                <!--&nbsp;&nbsp;<img src="<?php // echo $this->baseUrl('public/upload/media/agency/' . @trim($verifyData['AgencySysId']) . '/' . trim(@$agencynBankDetails['CancelledChequeFile']));   ?>" width="50" height="30"/>-->
+<?php } else { ?>
+                <label>Upload Cancelled Cheque copy</label>
+                <div class="col-md-12 no-padding testUPloadClass comlogo">
+                    <input id="cancelledChequeCopy" name="cancelledChequeCopy" type="file" class="file" showPreview=false> 
+                    <span class="small">Only allows file types of GIF, PNG, JPG, JPEG and PDF.</span>
+                </div><?php } ?>
+
+
+
+            <div class="clear"></div>
+        </div>
+    </div>
+</div>
+<h2 class="col-md-12">Expertise In</h2>
+<div class="col-md-12 no-padding">
+            <div class="col-md-6">
+             <label>Expertise In (Geography) : Country</label>
+                <div class="col-md-12 no-padding">  
+                    <select id="geographyCountry" name="geographyCountry[]" multiple class="demo-default select-theme" >
+                        <?php $countryArray=isset($verifyData['ExpertiseCountriesId']) && !empty($verifyData['ExpertiseCountriesId'])?explode(',',$verifyData['ExpertiseCountriesId']):array();
+                            foreach($this->countryList as $countryList) {
+                                @$selected = (in_array($countryList['ContId'], $countryArray)) ? 'selected' : '';
+                               //echo "<option value='$SupplierServices[SupplierSerSysId]' $selected>$SupplierServices[Title]</option>";
+                                echo "<option value='$countryList[ContId]'  $selected>$countryList[Title]</option>";
+                                
+                            }
+                        ?>                                                      
+                    </select> 
+                </div>
+            </div>
+            <div class="col-md-6">
+                <div class="form-group" id="expertisecityDiv">
+                        <label>Expertise In (Geography) : City</label>
+                        <div class="col-md-12 no-padding">
+                        <?php $cityArray=array();
+								if(count($this->selectedCityList)>0){
+                                    foreach($this->selectedCityList as $cityList) {
+										$cityArray[] = array('CityId'=>trim($cityList['CityId']),'Title'=>trim($cityList['Title'])."(".trim($cityList['Country']).")");
+									}
+								}
+								$cityArrayData='';
+									if(count($cityArray)>0){
+										//$cityArrayData=implode(',',$cityArray);
+										$cityArrayData=json_encode($cityArray);
+									}
+								?>
+                            <input name="expertisecity" id="expertisecity" class="form-control whbg" data-selectize-value='<?php echo $cityArrayData;?>' value=''  type="text" onkeypress="get_city_multiautosuggest('expertisecity','hidden_selected_expertisecity_id','hidden_selected_expertisecountry_id');" /> 
+                        </div>                 
+                    </div>
+            </div>
+    
+    <div class="col-md-12">
+        <div class="panel panel-default"> 
+            <div class="panel-heading">
+                <h3 class="panel-title">Agency Signature</h3>
+            </div>                               
+            <div class="panel-body">
+                <!--<div class="summernote">Enter ...</div>-->
+                <div class="col-md-12 no-padding"><textarea id="signature" name="signature" class="form-control"><?=trim(@$this->AgencyPrimaryUserSignature);?></textarea></div>
+            </div>
+        </div>
+    </div>
+        </div>
+
+
+<div class="col-md-12">    
+    <div class="form-group form-group1 text-right">
+        <!--<a href="companyDetails.html" class="btn btn-info">Submit</a> --> 
+        <!--<button class="submit btn btn-info" type="reset" name="reset">Save &amp; Exit</button>-->
+
+        <button class="submit btn btn-success" type="submit" name="<?php echo (@$agencynBankDetails != array() ? 'editButton' : 'addButton') ?>" id="submitbuttonComp">Continue</button> 
+        <!--<input type="submit" class="submit btn btn-info" value="Submit" />-->
+    </div>
+</div>
+<?php if ($registeredAddress['AddressSeq'] != '') { ?>
+    <input type="hidden" id="registeredAddress" name="registeredAddress" value="<?php echo ($registeredAddress['AddressSeq']); ?>"/>
+<?php } ?>
+<?php if (@$corporateAddress['AddressSeq'] != '') { ?>
+    <input type="hidden" id="corporateAddress" name="corporateAddress" value="<?php echo (@$corporateAddress['AddressSeq']); ?>"/>
+<?php } ?>
+<?php if (@$agencynBankDetails['BankInfoSysId'] != '') { ?>
+    <input type="hidden" id="BankId" name="BankId" value="<?php echo (@$agencynBankDetails['BankInfoSysId']); ?>"/>
+<?php } ?>
+<input type="hidden" name="AgencyId" id="AgencyId" value="<?php echo $this->verifyData['AgencySysId']; ?>"/>
+<input type="hidden" name="regEmail" value="<?php echo $this->verifyData['PrimaryEmail']; ?>"/>
+<input type="hidden" name="UserId" value="<?php echo $this->verifyData['PrimaryUserSysId']; ?>"/>
+</form>
+
+
+
+<!--Advance Radio and checkbox demo start-->
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/checkboxRadio.js'); ?>"></script>
+<!--Advance Radio and checkbox demo start-->
+<script src="<?php echo $this->baseUrl('public/assets/js/pages/selectTag.js'); ?>"></script>
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/plugins/fileinput.min.css'); ?>">
+<link rel="stylesheet" href="<?php echo $this->baseUrl('public/assets/css/jquery-ui.css'); ?>" >
+
+<script src="<?php echo $this->baseUrl(); ?>/public/tinymce/tinymce.min.js"></script>
+
+<!--include custom js functions-->
+<script src="<?php echo $this->baseUrl('public/js/registrationFunctions.js'); ?>"></script>
+<script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+<?php if (@$agencynBankDetails != array()) { ?>
+    <script type="text/javascript"> 
+        $(".compDetailRead").attr("readonly", true);
+        $("#companyServiceTaxNo").attr("readonly", false);
+        $('.selDropMess select,.icheck-black').attr('disabled', 'true');
+        $('.compDetailRead,.selectize-input').css('background-color','#eeee !important;');
+        
+        tinymce.init({
+        selector: "textarea#signature",
+        theme: "modern",
+        image_advtab: true,
+        templates: [
+            {title: 'Test template 1', content: 'Test 1'}]
+    });
+    
+        </script>
+<?php } ?>
+<script>
+//get_city_multiautosuggest('expertisecity','','');
+function get_city_multiautosuggest(inputId , hiddenInputId, countryInputId) {
+	$("#"+inputId).selectize({
+		onInitialize: function() {
+		var existingOptions = JSON.parse(this.$input.attr('data-selectize-value'));
+		var self = this;
+		if(Object.prototype.toString.call( existingOptions ) === "[object Array]") {
+			existingOptions.forEach( function (existingOption) {
+				self.addOption(existingOption);
+				self.addItem(existingOption[self.settings.valueField]);
+			});
+		}
+		else if (typeof existingOptions === 'object') {
+			self.addOption(existingOptions);
+			self.addItem(existingOptions[self.settings.valueField]);
+		}
+	},
+    preload: true,
+	//options: [],
+        openOnFocus: false,
+        valueField: 'CityId',
+		labelField: 'Title',
+		searchField: 'Title',
+		create: false,
+		render: {
+            option: function(item, escape) {
+                return '<div>' +escape(item.Title)+'</div>';
+            }
+        },
+    load: function(query, callback) {
+		var countryId=$("#geographyCountry").val();
+        $.ajax({
+            url: '/general/suggest-multi-city',
+            type: 'post',
+            data: {query: query, countryId : countryId},
+            dataType: 'json',
+            success: function (result) {
+				 callback(result);
+                //console.log(result)
+
+               // $('#select-amini1').html( '<option value="1">Test</option>' );
+
+                                    /*var resultList = result.map(function (item) {
+										//var aItem = {  CityId: item.CityId, Title: item.Title};
+										var aItem='<div data-value="'+item.CityId+'" data-selectable="" class="option">'+item.Title+'</div>';
+										return aItem;
+									});
+                    $('#expertisecityDiv .selectize-dropdown .selectize-dropdown-content').html(resultList);*/
+
+            }
+        });
+    },
+    
+  });
+}
+
+                //Make string toUpperCase.
+                $(document).ready(function () {
+                    $('#firm_compPanNo,#sole_ownerPanNo,#pvtltd_compPanNo').keyup(function () {
+                        $(this).val($(this).val().toUpperCase());
+                    });
+                });
+                
+                 $('#companyType,#accountType,#trxcurrency').change(function () {
+                    $(this).parent().children('label').eq(1).text('');
+                    });
+//                    
+                $('input:checkbox.natureOfBusiness').on('ifChecked', function (){
+                    
+                  var checkLength = $('[name="natureOfBusiness[]"]:checked').length;
+//                  alert(checkLength);
+                  if(checkLength >= 1){
+                  $('.nbusiness').children('.error').css('display','none');
+                  }
+                });
+                $('input:checkbox.natureOfBusiness').on('ifUnchecked', function (){
+                  var checkLength = $('[name="natureOfBusiness[]"]:checked').length;
+//                  alert(checkLength);
+                  if(checkLength == 0){
+                  $('.nbusiness').children('.error').css('display','block');
+                  }
+                });
+                 
+
+                $(document).ready(function () {
+                    $('#dispMessage').html('').delay(30000).fadeOut();
+                    $.validator.addMethod("validPAN", function (value, element) {
+                        return this.optional(element) || (value.length == 10 && /([A-Z]{5})([0-9]{4})([A-Z]{1})$/.test(value));
+                    }, "Please enter valid PAN No.");
+                     $.validator.addMethod("validCINNo", function (value, element) {
+                        return this.optional(element) || (value.length == 21 && /([A-Z]{1})([A-Z0-9]{5})([A-Z]{2})([0-9]{4})([A-Z]{3})([0-9]{6})$/.test(value));
+                    }, "Please enter valid CIN No.");
+                    $.validator.addMethod("validServiceTaxNumber", function (value, element) { //alert(value.length)
+                        //return this.optional(element) || (value.length == 16 && /([A-Z]{5})([0-9]{4})([A-Z]{1})([A-Z0-9]{5})$/.test(value));
+                        return this.optional(element) || (value.length == 15 && /([0-9]{2})([A-Z]{5})([0-9]{4})([A-Z]{1})([A-Z0-9]{3})$/.test(value));
+                    }, "Please enter valid GSTIN Number.");
+                    $.validator.addMethod("noStartEndWhiteSpaces", function (value, element) {
+//                        return this.optional(element) || /^[a-zA-Z0-9](?:[a-zA-Z0-9 ]*[a-zA-Z0-9])?$/.test(value);
+                          return this.optional(element) || !(/^\s+|\s+$/g.test(value));
+                    }, "Spaces are not allowed.");
+                    
+                    $.validator.addMethod("checkurl", function(value, element) {
+                    // now check if valid url
+                         return /^(www\.)[A-Za-z0-9_-]+\.+[A-Za-z0-9.\/%&=\?_:;-]+$/.test(value);
+                    }, "Please enter a valid URL.");
+
+                    $.validator.addMethod("customImageUploadRequired", function (value, element) {
+                        if ($('#submitbuttonComp').attr('name') == 'editButton' || value != '')
+                        {
+                            return true;
+                        }
+                        return false;
+                    }, "Please upload required file.");
+
+                    $("#AgencyCompanyDetailsForm").validate({
+                        errorPlacement: function (error, element) {
+//                                var name = $(element).attr("name");
+//                                console.log(name);
+                            //display error message outside div only for dropdowns
+                            if (element.parent().hasClass('selDropMess')) {
+                                element = element.parent();
+                                error.appendTo(element);
+                            } else if (element.parents('.comlogo').hasClass('testUPloadClass')) {
+                                element = element.parents('.comlogo');
+                                error.appendTo(element);
+                            } else if (element.parents('.nbusiness').hasClass("checkboxName")) {
+//                                    error.appendTo(".checkboxMess");
+                                element = element.parents('.nbusiness');
+                                error.appendTo(element);
+                            } else {
+                                error.insertAfter(element);
+                            }
+                        },
+//                            success: function (error) {
+//                                console.log(error);
+////                                $("#AgencyCompanyDetailsForm").find('.valid').removeClass("error");
+//                            },
+//                            highlight: function (element, errorClass, validClass) {
+//                                var name = $(element).attr("name");
+//                                $("input[name=" + name + "]").removeClass('error');
+//                            },
+                        highlight: function (error, element) {
+                            var name = $(element).attr("name");
+                            $("input[name=" + name + "]").removeClass('error');
+
+                        },
+                        rules: {
+                            "companyName": {
+                                required: true,
+                                noStartEndWhiteSpaces: true
+                            },
+                            "companyType": {
+                                required: true
+                            },
+//                            "companyServiceTaxNo": {
+//                                validServiceTaxNumber: true
+//                            },
+                            "natureOfBusiness[]": {
+                                required: true
+                            },
+//                            "compDisplayName": {
+//                                required: true,
+//                                noStartEndWhiteSpaces: true
+//                            },
+//                            "companyLogo": {
+//                                customImageUploadRequired: true,
+//                                accept: 'gif|jpg|png|jpeg',
+//                                filesize: 1048576
+//                            },
+//                            "websiteUrl":{
+//                                required:false,
+//                                checkurl:true
+//                            },
+                            "trxcurrency": {
+                                required: true
+                            },
+//                            "pvtltd_CinNO": {
+//                                required: false,
+////                                validCINNo : true,
+//                                noStartEndWhiteSpaces: true
+//                            },
+                            "pvtltd_compPanNo": {
+                                required: {
+                                    depends: function () {
+                                        return $('#companyType').val() == 1 || $('#companyType').val() == 4;
+                                    }
+                                },
+                                noStartEndWhiteSpaces: true,
+                                validPAN: true
+                            },
+//                            "pvtltd_CinNOFile": {
+//                                required: {
+//                                    depends: function () {
+//                                        return $('#pvtltd_CinNO').val() != '';
+//                                    }
+//                                },
+//                                accept: 'jpeg|gif|jpg|png|pdf',
+//                                filesize: 1048576
+//                            },
+//                            "pvtltd_compPanNoFile": {
+//                                required: {
+//                                    depends: function () {
+//                                        return $('#companyType').val() == 1 || $('#companyType').val() == 4;
+//                                    }
+//                                },
+//                                accept: 'jpeg|gif|jpg|png|pdf',
+//                                filesize: 1048576
+//                            },
+                            "sole_copyShopCertFile": {
+                                required: {
+                                    depends: function () {
+                                        return $('#companyType').val() == 2;
+                                    }
+                                },
+                                accept: 'jpeg|gif|jpg|png|pdf',
+                                filesize: 1048576
+                            },
+//                            "sole_ownerPanNo": {
+//                                required: {
+//                                    depends: function () {
+//                                        return $('#companyType').val() == 2;
+//                                    }
+//                                },
+//                                noStartEndWhiteSpaces: true,
+//                                validPAN: true
+//                            },
+//                            "sole_ownerPanNoFile": {
+//                                required: {
+//                                    depends: function () {
+//                                        return $('#companyType').val() == 2;
+//                                    }
+//                                },
+//                                accept: 'jpeg|gif|jpg|png|pdf',
+//                                filesize: 1048576
+//                            },
+                            "firm_copyPartnershipDeed": {
+                                required: {
+                                    depends: function () {
+                                        return $('#companyType').val() == 3;
+                                    }
+                                },
+                                accept: 'jpeg|gif|jpg|png|pdf',
+                                filesize: 1048576
+                            },
+                            "firm_compPanNo": {
+                                required: {
+                                    depends: function () {
+                                        return $('#companyType').val() == 3;
+                                    }
+                                },
+                                noStartEndWhiteSpaces: true,
+                                validPAN: true
+                            },
+//                            "firm_compPanNoFile": {
+//                                required: {
+//                                    depends: function () {
+//                                        return $('#companyType').val() == 3;
+//                                    }
+//                                },
+//                                accept: 'jpeg|gif|jpg|png|pdf',
+//                                filesize: 1048576
+//                            },
+                            "address": {
+                                required: true,
+                                noStartEndWhiteSpaces: true
+                            },
+                            "selectCountry": {
+                                required: true,
+                                noStartEndWhiteSpaces: true
+                            },
+                            //                                "selectState": {
+                            //                                    required: true
+                            //                                },
+                            "selectCity": {
+                                required: true,
+                                noStartEndWhiteSpaces: true
+                            },
+                            "pinCode": {
+                                required: true,
+                                number: true,
+                                noStartEndWhiteSpaces: true
+                            },
+//                            "copyAddressProofFile": {
+//                                customImageUploadRequired: true,
+//                                accept: 'jpeg|gif|jpg|png|pdf',
+//                                filesize: 1048576
+//                            },
+                            "corpAddress": {
+                                required: {
+                                    depends: function () {
+                                        return $('input[name=isSameAsRegisteredAddress]:checked').val() == 'No';
+                                    }
+                                },
+                                noStartEndWhiteSpaces: true
+                            },
+                            "selectCountry2": {
+                                required: {
+                                    depends: function () {
+                                        return $('input[name=isSameAsRegisteredAddress]:checked').val() == 'No';
+                                    }
+                                },
+                                noStartEndWhiteSpaces: true
+                            },
+//                                "selectState2": {
+//                                    required: {
+//                                        depends: function () {
+                            //                                            return $('input[name=isSameAsRegisteredAddress]:checked').val() == 'No';
+                            //                                        }
+                            //                                    }
+//                                },
+                            "selectCity2": {
+                                required: {
+                                    depends: function () {
+                                        return $('input[name=isSameAsRegisteredAddress]:checked').val() == 'No';
+                                    }
+                                },
+                                noStartEndWhiteSpaces: true
+                            },
+                            "pinCode2": {
+                                required: {
+                                    depends: function () {
+                                        return $('input[name=isSameAsRegisteredAddress]:checked').val() == 'No';
+                                    }
+                                },
+                                number: true
+                            },
+                            "copyAddressProofFile2": {
+                                customImageUploadRequired: {
+                                    depends: function () {
+                                        return $('input[name=isSameAsRegisteredAddress]:checked').val() == 'No';
+                                    }
+                                },
+                                accept: 'jpeg|gif|jpg|png|pdf',
+                                filesize: 1048576
+                            },
+//                            "accountHolderName": {
+//                                required: true,
+//                                noStartEndWhiteSpaces: true
+//                            },
+//                            "accountNumber": {
+//                                required: true,
+//                                noStartEndWhiteSpaces: true,
+//                                number: true
+//                            },
+//                            "ifscCode": {
+//                                required: true,
+//                                noStartEndWhiteSpaces: true
+//                            },
+//                            "accountType": {
+//                                required: true,
+//                                noStartEndWhiteSpaces: true
+//                            },
+//                            "BankName": {
+//                                required: true,
+//                                noStartEndWhiteSpaces: true
+//                            },
+//                            "branchName": {
+//                                required: true,
+//                                noStartEndWhiteSpaces: true
+//                            },
+//                            "selectCountry3": {
+//                                required: true,
+//                                noStartEndWhiteSpaces: true
+//                            },
+                            //                                "selectState3": {
+                            //                                    required: true
+                            //                                },
+//                            "selectCity3": {
+//                                required: true,
+//                                noStartEndWhiteSpaces: true
+//                            },
+//                            "cancelledChequeCopy": {
+////                                   required: true,
+//                                customImageUploadRequired: true,
+//                                accept: 'jpeg|gif|jpg|png|pdf',
+//                                filesize: 1048576
+//                            }
+                        },
+//                            debug:true,
+                        messages: {
+                            "companyName": {
+                                required: 'Please enter company name.'
+                            },
+                            "companyType": {
+                                required: 'Please select company type.'
+                            },
+                            "natureOfBusiness[]": {
+                                required: "You must check at least one nature of business."
+                            },
+//                            "compDisplayName": {
+//                                required: "Please enter your brand/short name."
+//                            },
+//                            "companyLogo": {
+//                                customImageUploadRequired: "Please upload company logo.",
+//                                accept: "Please upload valid extension. Ex gif,jpg,png,jpeg"
+//                            },
+//                            "websiteUrl":{
+//                               url: "Please enter valid url" 
+//                            },
+                            "trxcurrency": {
+                                required: 'Please select base currency.'
+                            },
+//                            "pvtltd_CinNO": {
+//                                required: "Please enter CIN Number.",
+//                            },
+                            "pvtltd_compPanNo": {
+                                required: "Please enter PAN Card Number."
+                            },
+//                            "pvtltd_CinNOFile": {
+//                                required: "Please upload CIN copy.",
+//                                accept: "Please upload valid extension. Ex gif,jpg,png,jpeg,pdf"
+//                            },
+//                            "pvtltd_compPanNoFile": {
+//                                required: "Please upload Pan card copy.",
+//                                accept: "Please upload valid extension. Ex gif,jpg,png,jpeg,pdf"
+//                            },
+                            "sole_copyShopCertFile": {
+                                required: "Please upload Copy of Shop & Establishment Certificate.",
+                                accept: "Please upload valid extension. Ex gif,jpg,png,jpeg,pdf"
+                            },
+//                            "sole_ownerPanNo": {
+//                                required: "Please enter Owner's PAN Number."
+//                            },
+//                            "sole_ownerPanNoFile": {
+//                                required: "Please upload Pan card copy.",
+//                                accept: "Please upload valid extension. Ex gif,jpg,png,jpeg,pdf"
+//                            },
+                            "firm_copyPartnershipDeed": {
+                                required: "Please upload Copy of Partnership Deed.",
+                                accept: "Please upload valid extension. Ex gif,jpg,png,jpeg,pdf"
+                            },
+                            "firm_compPanNo": {
+                                required: "Please enter PAN Card Number.",
+                                accept: "Please upload valid extension. Ex gif,jpg,png,doc,pdf"
+                            },
+//                            "firm_compPanNoFile": {
+//                                required: "Please upload Pan card copy.",
+//                                accept: "Please upload valid extension. Ex gif,jpg,png,jpeg,pdf"
+//                            },
+                            "address": {required: 'Please enter address.'
+                            },
+                            "selectCountry": {
+                                required: 'Please enter country name.'
+                            },
+                            //                                "selectState": { //                                    required: 'Please select State.'
+                            //                                },
+                            "selectCity": {
+                                required: 'Please enter city name.'
+                            },
+                            "pinCode": {
+                                required: 'Please enter pincode.'
+                            },
+//                            "copyAddressProofFile": {
+//                                required: 'Please upload copy of address proof.',
+//                                accept: "Please upload valid extension. Ex gif,jpg,png,jpeg,pdf"
+//                            },
+                            "corpAddress": {
+                                required: 'Please enter corporate address.'
+                            },
+                            "selectCountry2": {
+                                required: 'Please enter country name.'
+                            },
+                            //                                "selectState2": {
+                            //                                    required: 'Please select State.'
+                            //                                },
+                            "selectCity2": {
+                                required: 'Please enter city name.'
+                            },
+                            "pinCode2": {
+                                required: 'Please enter pincode.'
+                            },
+                            "copyAddressProofFile2": {
+                                customImageUploadRequired: 'Please upload copy of address proof.',
+                                accept: "Please upload valid extension. Ex gif,jpg,png,jpeg,pdf"
+                            },
+//                            "accountHolderName": {
+//                                required: 'Please enter account holder name.'
+//                            },
+//                            "accountNumber": {
+//                                required: 'Please enter account number.'
+//                            },
+//                            "ifscCode": {required: 'Please enter ifsc code.'
+//                            },
+//                            "accountType": {
+//                                required: 'Please select account type.'
+//                            },
+//                            "BankName": {
+//                                required: 'Please enter bank name.'
+//                            },
+//                            "branchName": {
+//                                required: 'Please enter branch name.'
+//                            },
+//                            "selectCountry3": {
+//                                required: 'Please enter country name.'
+//                            },
+                            //                                "selectState3": {
+                            //                                    required: 'Please select state.'
+                            //                                },
+//                            "selectCity3": {
+//                                required: 'Please enter city name.'
+//                            },
+//                            "cancelledChequeCopy": {
+////                                   required: 'Please upload copy of cancelled cheque.',
+//                                customImageUploadRequired: 'Please upload copy of cancelled cheque.',
+//                                accept: "Please upload valid extension. Ex gif,jpg,png,jpeg,pdf"
+//                            }
+
+                        },
+                        //                            submitHandler: function () {
+//            saveAgencyPersonalDetails();
+////            registration_process(3);
+                        //        }
+
+                    });
+                });
+
+                $('#isSameAsRegisteredAddress1').on('ifChecked', function (event) {
+                    $(".corpadd").hide();
+                });
+
+                $('#isSameAsRegisteredAddress').on('ifChecked', function (event) {
+                    $(".corpadd").show();
+                });
+
+                //                    $(".othertab").click(function () {
+//                        $(".specify").show();
+//                    });
+
+                $('input').on('ifToggled', function () {
+                    var checked = $("input[name=natureOfBusinessOthers]:checked").length;
+                    if (checked == 1) {
+                        $(".specify").show();
+                    } else {
+                        $(".specify").hide();
+                    }
+
+                });
+
+                $(".file").fileinput({
+                    showUpload: false,
+                    showRemove: false,
+                    showUploadedThumbs: false
+                });
+
+
+                $("#companyType").change(function () {
+
+                    $(this).find("option:selected").each(function () {
+//                           alert($(this).attr("value"));
+//firmTypeCl    
+                        val = $(this).attr("value");
+                        if (val == 2 || val == 3) {
+                            $(".firmTypeCl").hide();
+                            $("#firmTypeCl" + val).show();
+
+                        } else {
+                            $(".firmTypeCl").hide();
+                            $("#firmTypeCl1").show();
+                        }
+
+//                           else if ($(this).attr("value") == 2) {
+//                               $("#pvtltd").hide();
+//                               $("#sole").show();
+//                               $("#firm").hide();
+//
+//                           } else if ($(this).attr("value") == 3) {
+//                               $("#pvtltd").hide();
+//                               $("#sole").hide();
+//                               $("#firm").show();
+//
+//                           } else if ($(this).attr("value") == 4) {
+//                               $("#pvtltd").show();
+//                               $("#sole").hide();
+//                               $("#firm").hide();
+//
+//                           }
+                    });
+                }).change();
+</script>
+
+<style>
+    .file-preview{
+        display:none;
+    }
+</style>  
+<!--include custom js functions-->
+
+<script type="text/javascript">
+//     $('.selectize-input').css('background-color','#eee!important;');
+    function getCountryList() {
+        $("input[name=selectCountry]").autocomplete({
+            source: '/register/autosuggest-country',
+            minLength: 3,
+            focus: function (event, ui) {
+                event.preventDefault();
+                //alert(ui.item.value);               
+                $("#tags").val(ui.item.label);
+
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                $("input[name=selectCountry]").val(ui.item.label);
+                $("#hidden_selected_country_id_registered").val(ui.item.value).trigger('change');
+                //set city blank
+                $("input[name=selectCity]").val('');
+                $("#hidden_selected_city_id_registered").val('');
+
+            }
+        });
+
+    }
+
+    function getCityList() {
+        $('#hidden_selected_city_id_registered').val('');
+        var countryId = $('#hidden_selected_country_id_registered').val();
+
+        $("input[name=selectCity]").autocomplete({
+            source: "/register/autosuggest-city?countryId=" + countryId,
+            minLength: 3,
+            focus: function (event, ui) {
+                event.preventDefault();
+                $("#tags").val(ui.item.label);
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                $("input[name=selectCity]").val(ui.item.label);
+                $("#hidden_selected_city_id_registered").val(ui.item.value).trigger('change');
+
+            }
+        });
+
+    }
+
+    //autosuggest for corporate country
+    function getCorporateCountryList() {
+        $("input[name=selectCountry2]").autocomplete({
+            source: '/register/autosuggest-country',
+            minLength: 3,
+            focus: function (event, ui) {
+                event.preventDefault();
+                //alert(ui.item.value);               
+                $("#tags").val(ui.item.label);
+
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                $("input[name=selectCountry2]").val(ui.item.label);
+                $("#hidden_selected_country_id_corporate").val(ui.item.value).trigger('change');
+                //set city blank
+                $("input[name=selectCity2]").val('');
+                $("#hidden_selected_city_id_corporate").val('');
+
+            }
+        });
+
+
+    }
+
+//autosuggest for corporate City
+    function getCorporateCityList() {
+        //        alert('hi');
+        $('#hidden_selected_city_id_corporate').val('');
+        var countryId = $('#hidden_selected_country_id_corporate').val();
+        $("input[name=selectCity2]").autocomplete({
+            source: "/register/autosuggest-city?countryId=" + countryId,
+            minLength: 3,
+            focus: function (event, ui) {
+                event.preventDefault();
+                $("#tags").val(ui.item.label);
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                $("input[name=selectCity2]").val(ui.item.label);
+                $("#hidden_selected_city_id_corporate").val(ui.item.value).trigger('change');
+
+            }
+        });
+    }
+
+    //autosuggest for bank country
+    function getBankCountryList() {
+        $("input[name=selectCountry3]").autocomplete({
+            source: '/register/autosuggest-country',
+            minLength: 3,
+            focus: function (event, ui) {
+                event.preventDefault();
+                //alert(ui.item.value);               
+                $("#tags").val(ui.item.label);
+
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                $("input[name=selectCountry3]").val(ui.item.label);
+                $("#hidden_selected_country_id_bank").val(ui.item.value).trigger('change');
+                //set city blank
+                $("input[name=selectCity3]").val('');
+                $("#hidden_selected_city_id_bank").val('');
+
+            }
+        });
+
+
+    }
+
+//autosuggest for Bank City
+    function getBankCityList() {
+//        alert('hi');
+        $('#hidden_selected_city_id_bank').val('');
+        var countryId = $('#hidden_selected_country_id_bank').val();
+        $("input[name=selectCity3]").autocomplete({
+            source: "/register/autosuggest-city?countryId=" + countryId,
+            minLength: 3,
+            focus: function (event, ui) {
+                event.preventDefault();
+                $("#tags").val(ui.item.label);
+            },
+            select: function (event, ui) {
+                event.preventDefault();
+                $("input[name=selectCity3]").val(ui.item.label);
+                $("#hidden_selected_city_id_bank").val(ui.item.value).trigger('change');
+
+            }
+        });
+
+    }
+
+
+function uploadLogo() {
+//        $('#myModa1imageupload').removeData('modal');
+        $("#myModa1imageupload").modal('show');
+}
+
+</script>
+<style>
+/*.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control,.selectize-input[disabled], input[disabled], input[readonly] {
+background-color: #eee!important;
+}*/
+
+</style>
+

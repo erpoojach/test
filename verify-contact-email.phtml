@@ -1,0 +1,55 @@
+<?php
+//print_r($this->verificationSendersEmail); die; 
+//if($this->verifyData['IsVarified'] == 1){
+//   // echo "<script>registration_process(2);</script>";
+//}
+if($this->verificationSendersEmail == 'done'){
+//        if(empty(trim($ownerData['EmailIdForCustomer'])) || trim($ownerData['EmailIdForCustomer']) == trim($this->verifyData['PrimaryEmail']) || $this->verifyData['IsEmailIdForCustVarified'] == 1){
+            $displayVerifyEmailButton = 'style="display: inline-block;"';
+        } else {  
+            $displayVerifyEmailButton = 'style="display: none;"';
+          }
+?>
+
+<div id="regFormsData">
+
+    <h2 class="col-md-12">Your Email ID is successfully verified<br />
+        <span class="orange small"><i class="fa fa-check green"></i> <?php echo $this->verifyData['PrimaryEmail']; ?></span></h2>
+
+
+    <div style="visibility: hidden;"><!--div is used only for display:none, remove it -->
+        <h6 class="col-md-12">Your contact number verification is completed.</h6>
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Email ID</label>
+                <input type="email" class="form-control whbg" value="<?php echo $this->verifyData['PrimaryEmail']; ?>" readonly>                     
+            </div>
+        </div>
+
+
+        <div class="col-md-6">
+            <div class="form-group">
+                <label>Enter OTP</label>
+                <input type="email" class="form-control whbg">                     
+            </div>
+        </div>
+
+    </div>
+
+    <div class="col-md-12">    
+        <div class="form-group form-group1 text-right">
+            <!--<a href="personalDetails.html" class="btn btn-info"> Verify OTP</a>-->                
+            <a href="#" onclick="registration_process(2);
+                    return false;" class="btn btn-info"> Next</a> 
+        </div>
+    </div>
+
+    <!--<input type="hidden" id="regEmail" value="<?php //echo $this->verifyData['PrimaryEmail'];  ?>"/>-->
+</div>
+
+<input type="hidden" id="regEmail" name="regEmail" value="<?php echo $this->verifyData['PrimaryEmail']; ?>"/>
+<input type="hidden" id="AgencyId" name="AgencyId" value="<?php echo $this->verifyData['AgencySysId']; ?>"/>
+
+
+
+
