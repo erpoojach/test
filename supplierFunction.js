@@ -1,10 +1,3 @@
-/*
- * Catabatic Technology Pvt. Ltd.
- * File Name :supplierFunction.js
- * File Description :supplierFunction contains all data related to supplier management
- * Created By : Pooja Choudhary
- * Created Date: 02-Aug-2016
- */
 
 
 //hideModal is used to hide a model by model id
