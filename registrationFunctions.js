@@ -1,10 +1,4 @@
-/*
- * Catabatic Technology Pvt. Ltd.
- * File Name :registrationFunctions.js
- * File Description :registrationFunctions contains all data related to agency registration process
- * Created By : Pooja Choudhary
- * Created Date: 02-June-2016
- */
+
 
 $(document).ready(function () {
     //mobileNoLength.    
